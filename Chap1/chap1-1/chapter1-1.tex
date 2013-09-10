@@ -69,145 +69,153 @@
 %%----------------------------------------------------------
 \section*{Contents}
 \frame{\frametitle{Contents}\tableofcontents}
-
-
-
 %%----------------------------------------------------------
 \section{Basic Concepts and Taylor's Theorem}
 
-\subsection{Limit, Continuity, and Derivative}
-
-%如果你想书签不出现问题,请不要用\XeTeX
-                                 %这类复杂的指令,直接写XeTeX吧
+\subsection{Limit, Continuity, and Derivative} 
 
 \begin{frame}
-  \frametitle{Limit, Continuity, and Derivative}
-  If \emph{f} is a real-valued function of a real variable, then the limit of the function \emph{f} at \emph{c} (if it exists)is defined as the following:
+\frametitle{Limit, Continuity, and Derivative}
+If $f$ is a real-valued function of a real variable, then the limit of the function $f$ at $c$ (if it exists) is defined as the following:
 \begin{displaymath}
 \lim_{x \to c}f(x)=L
 \end{displaymath}
-means that to each positive $\varepsilon$ there corresponds a positive $\delta$ such that the distance between $f(x)$ and $L$ is less than $\varepsilon$ whenever the distance between $x$ and $c$ is less than $\delta$ ; that is $|f(x)−L|<\varepsilon$ whenever $0<|x−c|<\delta$.
-\\If there is no number $L$ with this property,the limit of $f$ at $c$ does not exist.
+
+means that to each positive $\varepsilon$ there corresponds a positive $\delta$ such that the distance between $f(x)$ and $L$ is less than $\varepsilon$ whenever the distance between $x$ and $c$ is less than $\delta$; that is $|f(x)−L|<\varepsilon$ whenever $0<|x−c|<\delta$.
+\\If there is no number $L$ with this property, the limit of $f$ at $c$ does not exist.
 \end{frame}
 
 \begin{frame}
-  \frametitle{Limit, Continuity, and Derivative}
- If $f$ is defined only on a specified subset $X$ of
-the real line, the definition of limit is modified
-so that $|f(x)−L| < \varepsilon$ whenever $x \in X$ and $0<|x−c|<\delta$.
+\frametitle{Limit, Continuity, and Derivative}
+If $f$ is defined only on a specified subset $X$ of the real line, the definition of limit is modified so that $|f(x)−L| < \varepsilon$ whenever $x \in X$ and $0<|x−c|<\delta$.
 \newline
 
 The function $f$ is said to be continuous at $c$ if
 \begin{displaymath}
 \lim_{x \to c}f(x)=f(c)
 \end{displaymath}
+
 \end{frame}
 
 \begin{frame}
-  \frametitle{Limit, Continuity, and Derivative}
+\frametitle{Limit, Continuity, and Derivative}
 \begin{description}
 \item[THEOREM 1] \textsf{Intermediate-Value Theorem for Continuous Functions}
 \end{description}
 On an interval [a,b], a continuous function assumes all values between $f(a)$ and $f(b)$. 
 \newline
 
-The derivative of $f$ at $c$ (if it exists)
-is defined by the equation
+The derivative of $f$ at $c$ (if it exists) is defined by the equation
 \begin{displaymath}
 f '(c)=\lim_{x \to c}\frac{f(x)-f(c)}{x-c}
 \end{displaymath}
-If $f$ is a function for which $f '(c)$ exists , we say that $f$ is differentiable at $c$, then $f$ must be
-continuous at $c$, $f '(x)$ exists and 
-$\lim_{x \to c}f(x)=f(c)$.
+
+If $f$ is a function for which $f '(c)$ exists, we say that $f$ is differentiable at $c$, then $f$ must be continuous at $c$, $f '(x)$ exists and $\lim_{x \to c}f(x)=f(c)$.
 \end{frame}
 
 \subsection{Taylor's Theorem}
+
 \begin{frame}
-  \frametitle{Taylor's Theorem}
+\frametitle{Taylor's Theorem}
 \begin{description}
 \item[THEOREM 2] \textsf{Taylor's Theorem with Lagrange Remainder}
 \end{description}
-If $f \in C^ n [a,b] $and if $f^{(n+1)}$ exists on the open interval (a,b), then for any points $c$  and $x$ in the closed interval [a,b], 
+If $f \in C^ n [a,b] $ and if $f^{(n+1)}$ exists on the open interval (a,b), then for any points $c$ and $x$ in the closed interval [a,b], 
 \begin{displaymath}
-f(x)=\sum_{k=0}^n \frac{1}{k!}f^{(k)}(c)(x-c)^k +E_n(x)
+f(x)=\sum_{k=0}^n \frac{1}{k!}f^{(k)}(c)(x-c)^k+E_n(x)
 \end{displaymath}
-where , for some point $\xi$ between $c$ and $x$ , the error term is
+
+where, for some point $\xi$ between $c$ and $x$, the error term is
+
 \begin{displaymath}
 E_n(x)=\frac{1}{(n+1)!}f^{(n+1)}(\xi)(x-c)^{(n+1)}
 \end{displaymath}
-Here ``$\xi$ between $c$ and $x$''means that either $c <\xi < x$ or $x < \xi <c$
-depending on the particular values of $x$ and $c$ involved.
+
+Here``$\xi$ between $c$ and $x$''means that either $c<\xi<x$ or $x<\xi<c$ depending on the particular values of $x$ and $c$ involved.
 \end{frame}
 
 \begin{frame}
-  \frametitle{Taylor's Theorem}
-An important special case arises when $c=0$. The equation becomes the \mbox{\boldmath {$Maclaurin$} {$series$}} for $f(x)$:
+\frametitle{Taylor's Theorem}
+An important special case arises when $c=0$. The equation becomes the \mbox{\boldmath{$Maclaurin$} {$series$}} for $f(x)$:
 \begin{displaymath}
-f(x)=\sum_{k=0}^n \frac{1}{k!}f^{(k)}(0)x^k +E_n(x)
+f(x)=\sum_{k=0}^n\frac{1}{k!}f^{(k)}(0)x^k+E_n(x)
 \end{displaymath}
+
 where 
+
 \begin{displaymath}
 E_n(x)=\frac{1}{(n+1)!}f^{(n+1)}(\xi)x^{(n+1)}
 \end{displaymath}
+
 \end{frame}
 
 \begin{frame}
-  \frametitle{Taylor's Theorem}
+\frametitle{Taylor's Theorem}
 \begin{description}
 \item[THEOREM 3] \textsf{Mean-Value Theorem}
 \end{description}
-If $f$ is in C[a,b] and if $f'$ exists on the open interval (a,b), then for $x$ and $c$ in the closed interval[a,b],
+If $f$ is in C[a,b] and if $f'$ exists on the open interval (a,b), then for $x$ and $c$ in the closed interval [a,b],
 \begin{displaymath}
 f(x)=f(c)+f'(\xi)(b-a)
 \end{displaymath}
+
 where $\xi$ is between $c$ and $x$.
 Taking $x=b$ and $c=a$ and rearranging, we have the important equation
+
 \begin{displaymath}
 f(b)-f(a)=f'(\xi)(b-a) \qquad where\: a<\xi<b
 \end{displaymath}
+ 
 \end{frame}
 
 \begin{frame}
-  \frametitle{Taylor's Theorem}
+\frametitle{Taylor's Theorem}
 \begin{description}
-\item[THEOREM 4] \textsf{Rolle's Theorem}
+\item[THEOREM 4] \textsf{Rolle's Theorem}.
 \end{description}
-If $f$ is continuous on [a,b], if $f'$ exists on  (a,b), and if $f(a)=f(b)$, then $f'(\xi)=0$ for some $\xi$ in the open interval(a,b).
+If $f$ is continuous on [a,b], if $f'$ exists on (a,b), and if $f(a)=f(b)$, then $f'(\xi)=0$ for some $\xi$ in the open interval (a,b).
 \newline
 
-This is an immediate consequence of an equation above. (Actually, in a formal development, Rolle's Theorem is proved first, and from it, Talor's Theorem is derived.) In both Rolle's Theorem and the Mean-value Theorem, there may be more than one point $\xi$ in the interval[a,b] that satisfies the given equations.
+This is an immediate consequence of an equation above. (Actually, in a formal development, Rolle's Theorem is proved first, and from it, Talor's Theorem is derived.) In both Rolle's Theorem and the Mean-value Theorem, there may be more than one point $\xi$ in the interval [a,b] that satisfies the given equations.
 \end{frame}
 
 \begin{frame}
-  \frametitle{Taylor's Theorem}
+\frametitle{Taylor's Theorem}
 \begin{description}
 \item[THEOREM 5] \textsf{Taylor's Theorem with Integral Remainder}
 \end{description}
 If $f \in C^{(n+1)}$[a,b], then for any points $x$ and $c$ in the closed interval [a,b],
 \begin{displaymath}
-f(x)=\sum_{k=0}^n \frac{1}{k!}f^{(k)}(c)(x-c)^k +R_n(x)
+f(x)=\sum_{k=0}^n\frac{1}{k!}f^{(k)}(c)(x-c)^k+R_n(x)
 \end{displaymath}
+
 where 
 \newcommand{\ud}{\mathrm{d}}
+
 \begin{displaymath}
-R_n(x)=\frac{1}{n!}\int_{c}^{x} f^{(n+1)}(t)(x-t)^n \ud t
+R_n(x)=\frac{1}{n!}\int_{c}^{x}f^{(n+1)}(t)(x-t)^n \ud t
 \end{displaymath}
+
 \end{frame}
 
 \subsection{Other Forms of Taylor's Formula}
+
 \begin{frame}
-  \frametitle{Other Forms of Taylor's Formula}
+\frametitle{Other Forms of Taylor's Formula}
 \begin{description}
 \item[THEOREM 6] \textsf{Alternative Form of Taylor's Theorem}
 \end{description}
 If $f \in C^{(n+1)}$[a,b], then for any points $x$ and $x+h$ in the closed interval [a,b],
 \begin{displaymath}
-f(x+h)=\sum_{k=0}^n \frac{h^k}{k!}f^{(k)}(x) +E_n(h)
+f(x+h)=\sum_{k=0}^n\frac{h^k}{k!}f^{(k)}(x)+E_n(h)
 \end{displaymath}
+
 where 
+
 \begin{displaymath}
 E_n(h)=\frac{h^{n+1}}{(n+1)!} f^{(n+1)}(\xi)
 \end{displaymath}
+
 In which the point $\xi$ lies between $x$ and $x+h$. In detail,
 \begin{displaymath}
 f(x+h)=f(x)+hf'(x)+\frac{h^2}{2}f''(x)+\frac{h^3}{3!}f'''(x)+\ldots+\frac{h^n}{n!}f^{(n)}(x)+E_n(h)
@@ -216,37 +224,43 @@ It is an important form for many applications.
 \end{frame}
 
 \begin{frame}
-  \frametitle{Other Forms of Taylor's Formula}
+\frametitle{Other Forms of Taylor's Formula}
 \begin{description}
 \item[THEOREM 7] \textsf{Taylor's Theorem in Two Variables}
 \end{description}
 Let $f \in C^{(n+1)}$([a,b]×[c,d]). If $(x,y)$ and $(x+h,y+k)$ are points in the rectangle [a,b]×[c,d]$\subseteq R^2$, then
 \begin{displaymath}
-f(x+h,y+k) = \sum_{i=0}^n \frac{1}{i!}\bigg(h\frac{\partial}{\partial x}+k\frac{\partial}{\partial y}\bigg)^i f(x+y)+E_n(h,k)
+f(x+h,y+k) = \sum_{i=0}^n\frac{1}{i!}\bigg(h\frac{\partial}{\partial x}+k\frac{\partial}{\partial y}\bigg)^if(x+y)+E_n(h,k)
 \end{displaymath}
+
 where
+
 \begin{displaymath}
-E_n(h,k)=\frac{1}{(n+1)!} \bigg(h\frac{\partial}{\partial x}+k\frac{\partial}{\partial y}\bigg)^{(n+1)}f(x+\theta h,y+\theta k)
+E_n(h,k)=\frac{1}{(n+1)!}\bigg(h\frac{\partial}{\partial x}+k\frac{\partial}{\partial y}\bigg)^{(n+1)}f(x+\theta h,y+\theta k)
 \end{displaymath}
+
 in which $\theta$ lies between $0$ and $1$.
 \end{frame}
 
 \begin{frame}
-  \frametitle{Other Forms of Taylor's Formula}
-%\shoveleft
+\frametitle{Other Forms of Taylor's Formula}
 \begin{displaymath}
 \bigg(h\frac{\partial}{\partial x}+k\frac{\partial}{\partial y}\bigg)^0f(x,y)=f(x,y)
 \end{displaymath}
+
 \begin{displaymath}
 \bigg(h\frac{\partial}{\partial x}+k\frac{\partial}{\partial y}\bigg)^1f(x,y)=\bigg(h\frac{\partial}{\partial x}+k\frac{\partial}{\partial y}\bigg)(x,y)
 \end{displaymath}
+
 \begin{displaymath}
 \bigg(h\frac{\partial}{\partial x}+k\frac{\partial}{\partial y}\bigg)^2f(x,y)=\bigg(h^2\frac{\partial^2f}{\partial x^2}+2hk\frac{\partial^2f}{\partial x\partial y}+k^2\frac{\partial^2f}{\partial y^2}\bigg)(x,y)
 \end{displaymath}
-and so on.Letting $f_x=\frac{ \partial f}{\partial x}$, $f_y=\frac{\partial f}{\partial y}$, $f_{xx}=\frac{ \partial^2f}{\partial x^2}$, $f_{xy}=\frac{ \partial^2f}{\partial x \partial y}$, $f_{yy}=\frac{ \partial^2f}{\partial y^2}$, we can write the first few terms of (5) as 
+
+and so on. Letting $f_x=\frac{\partial f}{\partial x}$, $f_y=\frac{\partial f}{\partial y}$, $f_{xx}=\frac{\partial^2f}{\partial x^2}$, $f_{xy}=\frac{\partial^2f}{\partial x \partial y}$, $f_{yy}=\frac{\partial^2f}{\partial y^2}$, we can write the first few terms of (5) as 
 \begin{displaymath}
-f(x+h,y+k) =f+(hf_x+kf_y)+\frac{1}{2}(h^2 f_{xx}+2hkf_{xy}+k^2f_{yy})+\ldots
+f(x+h,y+k)=f+(hf_x+kf_y)+\frac{1}{2}(h^2 f_{xx}+2hkf_{xy}+k^2f_{yy})+\ldots
 \end{displaymath}
+
 where on the right-hand side the function $f$ and each of the following partial derivatives are evaluated at (x,y).
 \end{frame}
  
