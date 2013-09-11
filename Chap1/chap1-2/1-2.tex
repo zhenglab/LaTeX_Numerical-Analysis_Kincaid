@@ -1,0 +1,244 @@
+\documentclass[notheorems,mathserif,table,compress]{beamer}  %dvipdfm选项是关键,否则编译统统通不过
+%%------------------------常用宏包------------------------
+%%注意, beamer 会默认使用下列宏包: amsthm, graphicx, hyperref, color, xcolor, 等等
+\usepackage{fontspec,xunicode,xltxtra}  % for XeTeX
+%%------------------------ThemeColorFont------------------------
+%% Presentation Themes
+% \usetheme[<options>]{<name list>}
+\usetheme{Madrid}
+%% Inner Themes
+% \useinnertheme[<options>]{<name>}
+%% Outer Themes
+% \useoutertheme[<options>]{<name>}
+\useoutertheme{miniframes} 
+%% Color Themes 
+% \usecolortheme[<options>]{<name list>}
+%% Font Themes
+% \usefonttheme[<options>]{<name>}
+\setbeamertemplate{background canvas}[vertical shading][bottom=white,top=structure.fg!7] %%背景色, 上25%的蓝, 过渡到下白.
+\setbeamertemplate{theorems}[numbered]
+\setbeamertemplate{navigation symbols}{}   %% 去掉页面下方默认的导航条.
+\usepackage{zhfontcfg}
+%\setsansfont[Mapping=tex-text]{文泉驿正黑}  %% 需要fontspec宏包
+     %如果装了Adobe Acrobat,可在font.conf中配置Adobe字体的路径以使用其中文字体
+     %也可直接使用系统中的中文字体如SimSun,SimHei,微软雅黑 等
+     %原来beamer用的字体是sans family;注意Mapping的大小写,不能写错
+     %设置字体时也可以直接用字体名，以下三种方式等同：
+     %\setromanfont[BoldFont={黑体}]{宋体}
+     %\setromanfont[BoldFont={SimHei}]{SimSun}
+     %\setromanfont[BoldFont={"[simhei.ttf]"}]{"[simsun.ttc]"}
+%%------------------------MISC------------------------
+\graphicspath{{figures/}}         %% 图片路径. 本文的图片都放在这个文件夹里了.
+%%------------------------正文------------------------
+\begin{document}
+\XeTeXlinebreaklocale "zh"         % 表示用中文的断行
+\XeTeXlinebreakskip = 0pt plus 1pt % 多一点调整的空间
+%%----------------------------------------------------------
+%% This is only inserted into the PDF information catalog. Can be left
+%% out.
+%%%
+%% Delete this, if you do not want the table of contents to pop up at
+%% the beginning of each subsection:
+\AtBeginSection[]{                              % 在每个Section前都会加入的Frame
+  \frame<handout:0>{
+    \frametitle{内容提要}\small
+    \tableofcontents[current,currentsubsection]
+  }
+}
+\AtBeginSubsection[]                            % 在每个子段落之前
+{
+  \frame<handout:0>                             % handout:0 表示只在手稿中出现
+  {
+    \frametitle{下一节内容}\small
+    \tableofcontents[current,currentsubsection] % 显示在目录中加亮的当前章节
+  }
+}
+%%----------------------------------------------------------
+\title[Numerical Analysis]{Numerical Analysis}
+\subtitle{Mathematics of Scientific Computing}
+\author[qiu]{主讲人~~~~~\textcolor{olive}{朱亚菲}\\
+    \quad 幻灯片制作~~\textcolor{olive}{孙晓庆}}
+\institute[中国海洋大学]{\small\textcolor{violet}{中国海洋大学~~信息科学与工程学院}}
+\date{2013~年~9~月~6~日}
+%\titlegraphic{\vspace{-6em}\includegraphics[height=7cm]{ouc}\vspace{-6em}}
+\frame{ \titlepage }
+%%----------------------------------------------------------
+\section*{目录}
+\frame{\frametitle{目录}\tableofcontents}
+%%----------------------------------------------------------
+\section{Order of convergence and Additional Basic  concepts}
+\subsection{Convergent Sequences} %如果你想书签不出现问题,请不要用\XeTeX
+                                 %这类复杂的指令,直接写XeTeX吧
+\begin{frame}
+  \frametitle{Convergent Sequences}
+  \begin{itemize}
+  \item In case of real numbers, a computer program may produce a sequence of real numbers $x_1$, $x_2$, $x_3$,... that are approaching the correct answer.
+  \item if there corresponds to each positive $\varepsilon$ a real numbers r such that $|x_{n}-l|< \varepsilon$ whenever $n>r$ 
+  \item For example  
+\begin{displaymath} 
+\lim_{n \to \infty}\frac{n+1}{n}=1
+\end{displaymath}
+  \end{itemize}
+  % \XeTeXpicfile "./logo.jpg" xscaled 100 yscaled 100 %插图也没有问题
+\end{frame}
+\subsection{Orders of Convergence} 
+\begin{frame}
+  \frametitle{Orders of Convergence}
+  \begin{itemize}
+  \item Let $[ x_n ]$ be a sequence of real numbers tending to a limit $x^*$. We say
+that the rate of convergence is at least \textbf{linear} if there are a constant$ c < 1$ and an
+integer N such that   
+\begin{displaymath}
+ |x_{n+1}-x^*|\leq  c|x_n-x^*|   (n\geq  N)
+\end{displaymath}
+
+  \item   We say that the rate of convergence is at least \textbf{superlinear} if there exists a sequence
+$\varepsilon_{n}$ tending to 0 and an integer N such that  
+\begin{displaymath}
+|x_{n+1}-x^*|\leq  \varepsilon_n|x_n-x^*|  (n\geq  N)
+\end{displaymath}
+  \end{itemize}
+  
+\end{frame}
+
+\begin{frame}
+  \frametitle{Orders of Convergence}
+ \begin{itemize}
+\item The convergence is at least \textbf{quadratic} if there are a constant C (not necessarily less
+than 1) and an integer N such that    
+\begin{displaymath}
+|x_{n+1}-x^*|\leq  C|x_n-x^*|^2  (n\geq  N)
+\end{displaymath}
+ 
+\item In general, if there are positive constants C and $\alpha$ and an integer N such that 
+\begin{displaymath}
+ |x_{n+1}-x^*|\leq  C|x_n-x^*|^\alpha  (n\geq  N)
+\end{displaymath}
+ We say that the rate of convergence is of \textbf{order $\alpha$}  at least.
+  \end{itemize}
+
+\end{frame}
+
+
+
+\subsection{Big O and Little o }
+\begin{frame}
+  \frametitle{Big O and Little o Notation}
+  \begin{itemize}
+  \item Let $[x_n]$ and $[\alpha_n]$ be two different  sequences, We write $x_n=O(\alpha_n)$
+ if there are constants C and $n_0$ such that $|x_n| \leq C|\alpha_n|$ when $n\geq n_0$. $x_n$ is "big oh"of $[\alpha_n]$   
+\newline
+
+  \item  The  equation $x_n=o(\alpha_n)$. For some $\varepsilon_n$ have   $\varepsilon_n \rightarrow 0$ and $|x_n|\leq \varepsilon_n|\alpha_n|$.   
+   \begin{displaymath}
+  (\lim_{n \to \infty}\frac{x_n}{\alpha_n}=0) 
+  \end{displaymath} 
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Big O and Little o Notation}
+  \begin{itemize}
+  \item In  general, we write $f(x)=O(g(x))$  $(x\rightarrow x^*)$\\
+  when  there  is a constant  C and a   neighborhood of $x^*$ such  that  $|f(x)|\leq C|g(x)|$ in that neighborhood.
+\newline
+
+ \item  Similarly, $f(x)=o(g(x))$ $(x\rightarrow x^*)$ means that 
+\begin{displaymath}
+ (\lim_{x \to x^*}\frac {f(x)}{g(x)}=0)
+\end{displaymath} 
+\end{itemize}
+\end{frame}
+
+\subsection{Mean-Value Theorem  for Integrals }
+\begin{frame}
+  \frametitle{Theorem}
+  \begin{itemize}
+ \item Let u and v be continuous real-valued functions on an interval [a,b],\\
+and suppose  that $v \geq  0$. Then  there  exists a point $\xi$ in $[a,b]$ such that 
+\begin{displaymath}
+\int _{a}^{b} u(x)v(x)dx {=} u(\xi)\int_{a}^{b}v(x)dx
+\end{displaymath} 
+  \end{itemize}
+\end{frame}
+\subsection{Nested Multiplication}
+
+\begin{frame}
+  \frametitle{Nested Multiplication}
+  \begin{itemize}
+ \item A polynomials can be rewritten in a nested  form  that it  requires  only a few more  than  the minimum  number of multiplications  when  evaluating it.
+ \item The polynomial $p(x)=a_nx^n+a_{n-1}x^{n-1}+....+a_2x^2+a_1x+a_0$  
+ \item can  be written  using  standard  mathematical  notation involving  the  sum $\sum$ and  product $\prod$ as follows:
+ \begin{displaymath}
+p(x)=\sum_{k=0}^n a_kx^k 
+\end{displaymath}
+  \item To evaluate  the  polynomial  efficiently, we can group  the  terms  using  nested  multiplication: $p(x)=a_0+x(a_1+x(a_2+....+x(a_{n-1}+xa_n))...))$
+\end{itemize}
+\end{frame}
+
+%\begin{frame}
+ % \frametitle{Nested Multiplication}
+ % \begin{itemize}
+%  \item  This  corresponds to  the  following  simple  algorithm  involving  only  n  multiplications  and n additions:
+%\end{itemize}
+%\begin{plaintext}
+%$p\leftarrow a_n$
+%for $k=n-1$ to 0 step -1 do
+%$p\leftarrow xp+a_k$
+%end  do
+%fjeij
+%\end{plaintext}
+%\end{frame}
+
+\subsection{Least Upper Bound Axiom}
+\begin{frame}
+  \frametitle{Least Upper Bound Axiom}
+  \begin{description}
+ \item Definition  of  supremum
+
+      The supremum of S is v $(v=supS=lubS)$ if  and only if
+
+     \begin{enumerate}
+       \item v is  an upper bound for S and
+        \item no real  number smaller than v is  an upper bound for S
+    \end{enumerate}
+ %\end{description}
+ 
+ %\begin{description}
+ \item Definition  of  infilmum 
+
+      The infilmum of S is u $(u=supS=lubS)$ if  and only if
+
+    \begin{enumerate}
+     \item  u is a lower bound for S and
+      \item no  real  number  greater  than  u is  a lower bound for S
+     \end{enumerate}
+\end{description}
+\end{frame}
+
+\subsection{Explicit and Implicit Functions}
+\begin{frame}
+  \frametitle{Explicit Functions}
+  \begin{itemize}
+\item A explicit function is usually defind via an explicit formula, from which a value of function can be computed for each  argument.
+\item  for  example  $f(x)=\sqrt{7x^3-2x}$
+\item A function $y=f(x)$ is well defined  by  the following  differential equation  with  an  initial  condition 
+\begin{displaymath}
+\begin{array}{ll}
+y'=1+\sin y\\
+ y(0)=0\\
+\end{array} %\right.
+\end{displaymath}
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Implicit Functions}
+  \begin{itemize}
+\item Let G be a function of two real variables defined and continuously differentiable  in a neighborhood of $(x_0,y_0)$, \\
+if $G(x_0,y_0)=0$ and$\partial G/\partial y\neq 0$ at $(x_0,y_0)$, then there is a positive $\delta$ and a continuously  differentiable function f defined  for $|x-x_0|<\delta$ such that $f(x_0)=y_0$ and  $G(x,f(x))=0$ for $|x-x_0|<\delta$ 
+
+
+\end{itemize}
+\end{frame}
+\end{document}
