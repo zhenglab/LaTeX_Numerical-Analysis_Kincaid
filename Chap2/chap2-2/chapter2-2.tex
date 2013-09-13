@@ -1,0 +1,432 @@
+\documentclass[notheorems,mathserif,table,compress]{beamer}  %dvipdfm选项是关键,否则编译统统通不过
+%%------------------------常用宏包------------------------
+%%注意, beamer 会默认使用下列宏包: amsthm, graphicx, hyperref, color, xcolor, 等等
+\usepackage{fontspec,xunicode,xltxtra}  % for XeTeX
+\usepackage{verbatim}
+\usepackage{mathabx}
+%%------------------------ThemeColorFont------------------------
+%% Presentation Themes
+% \usetheme[<options>]{<name list>}
+\usetheme{Madrid}
+%% Inner Themes双精度计算
+% \useinnertheme[<options>]{<name>}
+%% Outer Themes
+% \useoutertheme[<options>]{<name>}
+\useoutertheme{miniframes} 
+%% Color Themes 
+% \usecolortheme[<options>]{<name list>}
+%% Font Themes
+\usefonttheme{serif}
+\setbeamertemplate{background canvas}[vertical shading][bottom=white,top=structure.fg!7] %%背景色, 上25%的蓝, 过渡到下白.
+\setbeamertemplate{theorems}[numbered]
+\setbeamertemplate{navigation symbols}{}   %% 去掉页面下方默认的导航条.
+\usepackage{zhfontcfg}
+%\setsansfont[Mapping=tex-text]{文泉驿正黑}  %% 需要fontspec宏包
+     %如果装了Adobe Acrobat,可在font.conf中配置Adobe字体的路径以使用其中文字体
+     %也可直接使用系统中的中文字体如SimSun,SimHei,微软雅黑 等
+     %原来beamer用的字体是sans family;注意Mapping的大小写,不能写错
+     %设置字体时也可以直接用字体名，以下三种方式等同：
+     %\setromanfont[BoldFont={黑体}]{宋体}
+     %\setromanfont[BoldFont={SimHei}]{SimSun}
+     %\setromanfont[BoldFont={"[simhei.ttf]"}]{"[simsun.ttc]"}
+%%------------------------MISC------------------------
+\graphicspath{{figures/}}         %% 图片路径. 本文的图片都放在这个文件夹里了.
+%%------------------------正文------------------------
+\begin{document}
+\XeTeXlinebreaklocale "zh"         % 表示用中文的断行
+\XeTeXlinebreakskip = 0pt plus 1pt % 多一点调整的空间
+%%----------------------------------------------------------
+%% This is only inserted into the PDF information catalog. Can be left
+%% out.
+%%%
+%% Delete this, if you do not want the table of contents to pop up at
+%% the beginning of each subsection:
+\AtBeginSection[]{                              % 在每个Section前都会加入的Frame
+  \frame<handout:0>{
+    \frametitle{Contents}\small
+    \tableofcontents[current,currentsubsection]
+  }
+}
+
+\AtBeginSubsection[]                            % 在每个子段落之前
+{
+  \frame<handout:0>                             % handout:0 表示只在手稿中出现
+  {
+    \frametitle{Contents}\small
+    \tableofcontents[current,currentsubsection] % 显示在目录中加亮的当前章节
+  }
+}
+
+%%----------------------------------------------------------
+\title[Numerical Analysis]{Numerical Analysis}
+\subtitle{Mathematics of Scientific Computing}
+\author[qiu]{主讲人~~~~~\textcolor{olive}{邱欣欣}\\
+    \quad 幻灯片制作~~\textcolor{olive}{邱欣欣}}
+\institute[中国海洋大学]{\small\textcolor{violet}{中国海洋大学~~信息科学与工程学院}}
+\date{2013~年~9~月~13~日}
+%\titlegraphic{\vspace{-6em}\includegraphics[height=7cm]{ouc}\vspace{-6em}}
+\frame{ \titlepage }
+%%----------------------------------------------------------
+\section*{Contents}
+\frame{\frametitle{Computer Arithmetic}\tableofcontents}
+%%----------------------------------------------------------
+\section{Absolute and Relative Errors : Loss of Significance}
+
+\begin{frame}
+\frametitle{Absolute and Relative Errors : Loss of Significance}
+\begin{itemize}
+\item When a real number $x$ is approximated by another number $x^*$, the error is $x−x^*$.
+\begin{itemize}
+\item The absolute error is $|x-x^*|$ \newline
+\item The relative error is $\Big|\cfrac{x-x^*}{x}\Big|$ \newline
+\end{itemize}
+In scientific measurements, it is almost always the relative error that is more significant.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Absolute and Relative Errors : Loss of Significance}
+\begin{itemize}
+\item We have already considered relative error in our investigation of roundoff errors. The inequality 
+\begin{displaymath}
+\bigg|\frac{x-fl(x)}{x}\bigg|\leq \varepsilon
+\end{displaymath}
+
+is a statement about the relative error involved in representing a real number $x$ by a nearby floating-pointing machine number.
+\end{itemize}
+\end{frame}
+
+\subsection{Loss of Significance} 
+
+\begin{frame}
+\frametitle{Loss of Significance}
+\begin{itemize}
+\item Examples for large relative error can occur, subtract the two numbers
+\begin{eqnarray*}
+x=0.37214\,78693 \\
+y=0.37202\,30572 \\
+x−y=0.00012\,48121
+\end{eqnarray*}
+
+If this calculation were to be performed in a decimal computer having a five-digit mantissa, we would see
+\begin{eqnarray*}
+fl(x)=0.37215 \\
+fl(y)=0.37202 \\
+fl(x)−fl(y)=0.00013
+\end{eqnarray*}
+
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Loss of Significance}
+\begin{itemize}
+\item The relative error is then very large
+\begin{displaymath}
+\bigg|\frac{x-y-[fl(x)-fl(y)]}{x-y}\bigg|=\bigg|\frac{0.00012\,48121-0.00013}{0.00012\,48121}\bigg|\approx4\%
+\end{displaymath}
+
+\item Whenever the computer must shift the digits in the mantissa to achieve a normalized floating-point number, additional 0's are supplied on the right. These 0's are spurious and do not represent additional accuracy. Thus, $fl(x)-fl(y)$ is represented in the computer as $0.13000\times10^{-3}$, but the 0's in the mantissa serve only as placeholders.
+\end{itemize}
+\end{frame}
+
+\subsection{Substraction of Nearly Equal Quantities} 
+
+\begin{frame}
+\frametitle{Substraction of Nearly Equal Quantities}
+\begin{description}
+\item[EXAMPLE] The assignment statement
+\begin{displaymath}
+y\leftarrow\sqrt{x^2+1}-1
+\end{displaymath}
+
+involves subtractive cancellation and loss of significance for small values of $x$. How can we avoid this trouble?
+\item[Solution] Rewrite the function in this way 
+\begin{displaymath}
+y=\Big(\sqrt{x^2+1}-1\Big)\bigg(\frac{\sqrt{x^2+1}+1}{\sqrt{x^2+1}+1}\bigg)=\frac{x^2}{\sqrt{x^2+1}+1}
+\end{displaymath}
+
+Thus, the difficulty is avoided by reprogramming with a different assignment statement
+\begin{displaymath}
+y\leftarrow\frac{x^2}{\sqrt{x^2+1}+1}
+\end{displaymath}
+
+\end{description}
+\end{frame}
+
+\subsection{Loss of Precision}
+
+\begin{frame}
+\frametitle{Loss of Precision}
+\begin{description}
+\item[THEOREM 1] \textsf{Theorem on Loss of Precision}\\
+If $x$ and $y$ are positive normalized floating-point binary machine numbers such that $x>y$ and 
+\begin{displaymath}
+2^{-q}\leq{1-\frac{y}{x}}\leq 2^{-p}
+\end{displaymath}
+
+then at most $q$ and at least $p$ significant binary bits are lost in the subtraction $x-y$.
+\end{description}
+\end{frame}
+
+\begin{frame}
+\frametitle{Loss of Precision}
+\begin{description}
+\item[Proof] The normalized binary floating-point forms for $x$ and $y$ are 
+\begin{displaymath}
+x=r\times 2^n\qquad(\frac{1}{2}\leq r \leq 1)
+\end{displaymath}
+\begin{displaymath}
+y=s\times 2^m\qquad(\frac{1}{2}\leq s \leq 1)
+\end{displaymath}
+
+We must write $y$ as 
+\begin{displaymath}
+y=(s\times2^{m-n})\times2^n
+\end{displaymath}
+
+and then we have
+\begin{displaymath}
+x-y=(r-s\times2^{m-n})\times2^n
+\end{displaymath}
+
+Then mantissa of this number satisfies
+\begin{displaymath}
+r-s\times2^{m-n}=r(1-\frac{s\times2^m}{r\times2^n})=r(1-\frac{y}{x})<2^{-p}
+\end{displaymath}
+
+\end{description}
+\end{frame}
+
+\begin{frame}
+\frametitle{Loss of Precision}
+\begin{description}
+\item[EXAMPLE] Consider the assignment statement
+\begin{displaymath}
+y\leftarrow x-\sin x
+\end{displaymath} 
+
+Since $\sin x\approx x$ for small values of $x$, this calculation involves a loss of significance. How can this be avoided?
+\item[Solution] Let us find an alternative form for the function $y=x-\sin x$. The Taylor series for $\sin x$ is helpful here. Thus, we have 
+\begin{equation*}
+\begin{split}
+ y& =x-\sin x \\
+  & =x-(x-\frac{x^3}{3!}+\frac{x^5}{5!}-\frac{x^7}{7!}+\ldots)\\
+  & =\frac{x^3}{3!}-\frac{x^5}{5!}+\frac{x^7}{7!}-\ldots
+\end{split}
+\end{equation*}
+
+\end{description}
+\end{frame}
+
+\begin{frame}
+\frametitle{Loss of Precision}
+\begin{description}
+\item[Solution] If $x$ is near 0, then a truncated series can be used, as in this assignment statement
+\begin{displaymath}
+y\leftarrow({x^3}/{6})(1-({x^2}/{20})(1-({x^2}/{42})(1-{x^2}/{72})))
+\end{displaymath}
+
+If values of $y$ are needed for a wide range of $x$-values in this function, it would be best to use both assignment statement, each in its proper range.
+\end{description} 
+\end{frame}
+
+\begin{frame}
+\frametitle{Loss of Precision}
+\begin{description}
+\item[Solution] We see that the loss of bits in the subtraction of the first assignment statement can be limited to at most one bit by restricting $x$ so that
+\begin{displaymath}
+1-\frac{\sin x}{x}\geq \frac{1}{2}
+\end{displaymath}
+
+It is easy to determine that $x$ must be at least 1.9. Thus for $|x|\geq 1.9$, we should use the first assignment statement involving $x-\sin x$, and for $|x|<1.9$ we should use a truncated series. We can verify that for the worst case ($x=1.9$), seven terms in the series give $y$ with an error at most $10^{-9}$.
+\end{description} 
+\end{frame}
+
+\subsection{Evaluation of Functions}
+
+\begin{frame}
+\frametitle{Evaluation of Functions}
+\begin{itemize}
+\item There is another situation in which a drastic loss of significant digits occurs. This is in the evaluation of certain functions for very large arguments. Let us illustrate with the cosine function
+\begin{displaymath}
+\cos (x+2n\pi)=\cos x \qquad (n\;is\;an\;integer)
+\end{displaymath}
+
+By the use of this property, the evaluation of $\cos x$ for any argument can be effected by evaluating at a reduced argument in the interval [0,2$\pi$]. 
+\item For example, the evaluation of $\cos x$ at $x=33278.21$ proceeds by finding the reduced argument
+\begin{displaymath}
+y=33278.21-5296\times2\pi=2.46
+\end{displaymath}
+
+\end{itemize}
+\end{frame}
+
+\subsection{Interval Arithmetic}
+
+\begin{frame}
+\frametitle{Interval Arithmetic}
+\begin{itemize}
+\item A method of controlling computations to know the extent of roundoff error is interval arithmetic. In this manner of computing, each calculated number is accompanied by an interval that is guaranteed to contain the correct value. Ideally, of course, these intervals are very small, and final answers can be given with only small uncertainties. However, the cost of carrying intervals(instead of simple machine numbers) throughout a lenthy computation may make the procedure cumbersome. Consequently, it is used only when great reliance must be placed on the computations. Also, it may be difficult to keep the intervals from growing much larger than is realistic.
+\end{itemize}
+\end{frame}
+
+\section{Stable and Unstable Computations : Conditioning}
+
+\subsection{Numerical Instability}
+
+\begin{frame}
+\frametitle{Numerical Instability}
+\begin{itemize}
+\item We say that a numerical process is unstable if small errors made at one stage of the process are magnified in subsequent stages and seriously degrade the accuracy of the overall calculation.\\
+An example:
+\begin{displaymath}
+\left\{ \begin{array}{ll}x_0=1\qquad x_1=\frac{1}{3}\\
+x_{n+1}=\frac{13}{3}x_n-\frac{4}{3}x_{n-1} & \textrm{(n$\leq$1)} \end{array}\right.
+\end{displaymath}
+
+It is easily seen that this recurrence relation generates the sequence
+\begin{displaymath}
+x_n=(\frac{1}{3})^n
+\end{displaymath}
+
+The equation is true for $n=0$ and $n=1$. If its validity is granted for $n\leq m$, then its validity for $n=m+1$ follows from
+\end{itemize}
+\begin{displaymath}
+x_{m+1}=\frac{13}{3}x_m-\frac{4}{3}x_{m-1}=\frac{13}{3}(\frac{1}{3})^m-\frac{4}{3}(\frac{1}{3})^{m-1}=(\frac{1}{3})^{m-1}[\frac{13}{9}-\frac{4}{3}]=(\frac{1}{3})^{m+1}
+\end{displaymath}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Numerical Instability}
+\begin{itemize}
+\item Here are some of the computed terms, calculated on a 32-bit computer similar to the Marc-32:
+\begin{flushleft}
+$x0 = 1.00000\,00$\\
+$x1 = 0.33333\,33$\qquad(7 correctly rounded significant digits)
+$x2 = 0.11111\,12$\qquad(6 correctly rounded significant digits)
+$x3 = 0.03703\,73$\qquad(5 correctly rounded significant digits) 
+$x4 = 0.01234\,66$\qquad(4 correctly rounded significant digits)
+$x5 = 0.00411\,87$\qquad(3 correctly rounded significant digits) 
+$x6 = 0.00138\,57$\qquad(2 correctly rounded significant digits)
+$x7 = 0.00051\,31$\qquad(1 correctly rounded significant digits) 
+$x8 = 0.00037\,57$\qquad(0 correctly rounded significant digits) 
+$x9 = 0.00094\,37$\\
+$\cdots$ \\
+$x14 = 0.91437\,35$\\ 
+$x15 = 3.65749\,3$ \qquad (incorrect with relative error of $10^8$)
+\end{flushleft}
+
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Numerical Instability}
+\begin{itemize}
+\item Whether a process is numerically stable or unstable should be decided on the basis of relative errors. Thus, if there are large errors in a computation, that situation may be quite acceptable if the answers are large.
+\item Let us start with initial values $x_0=1$ and $x_1=4$. Now the correct solution is now $x_n=4^n$, and the results of computation are correct to seven significant figures. Here are three of them:
+\begin{equation*}
+\begin{split}
+x_1&=4.00000\,6\\
+x_{10}&=1.04857\,6\times10^6\\
+x_{20}&=1.09951\,2\times10^{12}
+\end{split}
+\end{equation*}
+
+In this case, the correct values are large enough to overwhelm the errors.
+\end{itemize}
+\end{frame}
+ 
+\subsection{Conditioning}
+
+\begin{frame}
+\frametitle{Conditioning}
+\begin{itemize}
+\item Condition or conditioning:\newline
+\begin{itemize}
+\item Used to indicated how sensitive the solution of a problem to the small relative changes of the input data.\newline
+\item Small changes of the input can produce large changes of the output: ill conditioned.\newline
+\item A conditon number can be defined. If the number is large, it indicates an ill-conditioned problem.
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Conditioning}
+\begin{itemize}
+\item Suppose our problem is simply to evaluate a function $f$ at a point $x$. If $x$ is perturbed slightly, what is the effect on $f(x)$? If this question refers to absolute errors, we can invork the Mean-Value Theorem and write
+\begin{displaymath}
+f(x+h)-f(x)=f'(\xi)h\approx hf'(x)
+\end{displaymath}
+
+Thus, if $f'(x)$ is not too large, the effect of the perturbation on $f(x)$ is small.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Conditioning}
+\begin{itemize}
+\item  In perturbing $x$ by the amount $h$, we have $h/x$ as the relative size of the perturbation. Likewise, when $f(x)$ is perturbed to $f(x+h)$, the relative size of that perturbation is 
+\begin{displaymath}
+\frac{f(x+h)-f(x)}{f(x)}\approx\frac{hf'(x)}{f(x)}=\bigg[\frac{xf'(x)}{f(x)}\bigg]\bigg(\frac{h}{x}\bigg) 
+\end{displaymath}
+
+Thus, the factor $xf'(x)/f(x)$ serves as a condition number for this problem.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Conditioning}
+\begin{description}
+\item[EXAMPLE 1] What is the condition number for the evaluation of the inverse sine function?
+\item[Solution] Let $f(x)=\arcsin x$. Then
+\begin{displaymath}
+\frac{xf'(x)}{f(x)}=\frac{x}{\sqrt{1-x^2}\arcsin x}
+\end{displaymath}
+
+\end{description}
+\end{frame}
+
+\begin{frame}
+\frametitle{Conditioning}
+\begin{itemize}
+\item Let $f$ and $g$ be two functions that belong to class $C^2$ in a neighborhood of $r$, where $r$ is a root of $f$. We assume that $r$ is a simple root, so that $f'(r)\neq0$. If we perturb the function $f$ to $F\equiv f+\varepsilon g$, where is the new root? Suppose the new root is $r+h$, The perturbuation $h$ satisfies the equation
+\begin{displaymath}
+f(r+h)+\varepsilon g(r+h)=0
+\end{displaymath}
+
+Since $f$ and $g$ belong to $C^2$, we can use Taylor's Theorem to express $F(r+h)$:
+\begin{displaymath}
+\Big[f(r)+hf'(r)+\frac{1}{2}h^2 f''(\xi)\Big]+\varepsilon\Big[g(r)+hg'(r)+\frac{1}{2}h^2g''(\eta)\Big]=0
+\end{displaymath}
+
+Discarding terms in $h^2$ and using the fact that $f(r)=0$, we obtain
+\begin{displaymath}
+h\approx-\varepsilon \frac{g(r)}{f'(r)+\varepsilon g'(r)}\approx-\varepsilon \frac{g(r)}{f'(r)}
+\end{displaymath}
+
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Conditioning}
+\begin{description}
+\item[EXAMPLE 2] We consider a classic example given by Wilkinson. Let 
+\begin{equation*}
+\begin{split}
+f(x)&=\prod^{20}_{k=1}(x-k)=(x-1)(x-2)\ldots(x-20)\\
+g(x)&=x^{20}
+\end{split}
+\end{equation*}
+
+The root of $f$ are obviously the integers 1, 2, \ldots, 20. How is the root $r=20$ affected by perturbing $f$ to $f+\varepsilon g$?
+\item[Solution]The answer is 
+\begin{displaymath}
+h\approx-\varepsilon\frac{g(20)}{f'(20)}=-\varepsilon\frac{20^{20}}{19!}\approx-\varepsilon 10^9
+\end{displaymath}
+
+\end{description}
+\end{frame}
+
+\end{document}
