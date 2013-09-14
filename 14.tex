@@ -66,21 +66,29 @@
 \section*{目录}
 \frame{\frametitle{目录}\tableofcontents}
 %%----------------------------------------------------------
-\section{Order of convergence and Additional Basic  concepts}
+\section{Difference Equations}
 
-\subsection{Convergent Sequences} %如果你想书签不出现问题,请不要用\XeTeX
+\subsection{basic  concepts} %如果你想书签不出现问题,请不要用\XeTeX
                                  %这类复杂的指令,直接写XeTeX吧
 \begin{frame}
-  \frametitle{Convergent Sequences}
+  \frametitle{basic  concepts }
   \begin{itemize}
-  \item In case of real numbers, a computer program may produce a sequence of real numbers $x_1$, $x_2$, $x_3$,... that are approaching the correct answer.
-  \item if there corresponds to each positive $\varepsilon$ a real numbers r such that $|x_{n}-l|< \varepsilon$ whenever $n>r$ 
-  \item For example  
+  \item V stand for  the set of all infinite  sequences of complex numbers,\\
+        such  as  $x=[x_1, x_2, x_3, ...]$   $y=[y_1, y_2, y_3, ...]$  \\
+        A sequence is a complex-valued  function  defined  on  the  set of positive  integers $n={1,2,3,...}$.\\
+        x(n) is the value of the function x at  the  argument n. 
+  \item In the  set V, we define two operations:
+   
 
   \begin{displaymath} 
-  \lim_{n \to \infty}\frac{n+1}{n}=1
-  \end{displaymath}
+  x+y=[x_1+y_1, x_2+y_2, x_3+y_3,...]
+  \lambd x =[\lambd x_1, \lambd x_2, \lambd x_3,...]
+  (x+y)_n=x_n+y_n
+  (\lambd x)_n=\lambd x_n
+ \end{displaymath}
+  with  the adoption of these definitions, V becomes a vector space. 
 
+  \item 0 element in V, namely,$0=[0,0,0,...]$
   \end{itemize}
   % \XeTeXpicfile "./logo.jpg" xscaled 100 yscaled 100 %插图也没有问题
 \end{frame}
