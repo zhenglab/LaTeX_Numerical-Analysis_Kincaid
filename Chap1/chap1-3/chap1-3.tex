@@ -1,0 +1,315 @@
+\documentclass[notheorems,mathserif,table,compress]{beamer}  %dvipdfm选项是关键,否则编译统统通不过
+%%------------------------常用宏包------------------------
+%%注意, beamer 会默认使用下列宏包: amsthm, graphicx, hyperref, color, xcolor, 等等
+\usepackage{fontspec,xunicode,xltxtra}  % for XeTeX
+%%------------------------ThemeColorFont------------------------
+%% Presentation Themes
+% \usetheme[<options>]{<name list>}
+\usetheme{Madrid}
+%% Inner Themes
+% \useinnertheme[<options>]{<name>}
+%% Outer Themes
+% \useoutertheme[<options>]{<name>}
+\useoutertheme{miniframes} 
+%% Color Themes 
+% \usecolortheme[<options>]{<name list>}
+%% Font Themes
+% \usefonttheme[<options>]{<name>}
+\setbeamertemplate{background canvas}[vertical shading][bottom=white,top=structure.fg!7] %%背景色, 上25%的蓝, 过渡到下白.
+\setbeamertemplate{theorems}[numbered]
+\setbeamertemplate{navigation symbols}{}   %% 去掉页面下方默认的导航条.
+\usepackage{zhfontcfg}
+%\setsansfont[Mapping=tex-text]{文泉驿正黑}  %% 需要fontspec宏包
+     %如果装了Adobe Acrobat,可在font.conf中配置Adobe字体的路径以使用其中文字体
+     %也可直接使用系统中的中文字体如SimSun,SimHei,微软雅黑 等
+     %原来beamer用的字体是sans family;注意Mapping的大小写,不能写错
+     %设置字体时也可以直接用字体名，以下三种方式等同：
+     %\setromanfont[BoldFont={黑体}]{宋体}
+     %\setromanfont[BoldFont={SimHei}]{SimSun}
+     %\setromanfont[BoldFont={"[simhei.ttf]"}]{"[simsun.ttc]"}
+%%------------------------MISC------------------------
+\graphicspath{{figures/}}         %% 图片路径. 本文的图片都放在这个文件夹里了.
+%%------------------------正文------------------------
+\begin{document}
+\XeTeXlinebreaklocale "zh"         % 表示用中文的断行
+\XeTeXlinebreakskip = 0pt plus 1pt % 多一点调整的空间
+%%----------------------------------------------------------
+%% This is only inserted into the PDF information catalog. Can be left
+%% out.
+%%%
+%% Delete this, if you do not want the table of contents to pop up at
+%% the beginning of each subsection:
+\AtBeginSection[]{                              % 在每个Section前都会加入的Frame
+  \frame<handout:0>{
+    \frametitle{内容提要}\small
+    \tableofcontents[current,currentsubsection]
+  }
+}
+\AtBeginSubsection[]                            % 在每个子段落之前
+{
+  \frame<handout:0>                             % handout:0 表示只在手稿中出现
+  {
+    \frametitle{下一节内容}\small
+    \tableofcontents[current,currentsubsection] % 显示在目录中加亮的当前章节
+  }
+}
+%%----------------------------------------------------------
+\title[Numerical Analysis]{Numerical Analysis}
+\subtitle{Mathematics of Scientific Computing}
+\author[sun]{主讲人~~~~~\textcolor{olive}{孙晓庆}\\
+    \quad 幻灯片制作~~\textcolor{olive}{孙晓庆}}
+\institute[中国海洋大学]{\small\textcolor{violet}{中国海洋大学~~信息科学与工程学院}}
+\date{2013~年~9~月~13~日}
+%\titlegraphic{\vspace{-6em}\includegraphics[height=7cm]{ouc}\vspace{-6em}}
+\frame{ \titlepage }
+%%----------------------------------------------------------
+\section*{目录}
+\frame{\frametitle{目录}\tableofcontents}
+%%----------------------------------------------------------
+\section{Difference Equations}
+
+\subsection{Basic  Concepts} %如果你想书签不出现问题,请不要用\XeTeX
+                                 %这类复杂的指令,直接写XeTeX吧
+\begin{frame}
+\frametitle{Basic  Concepts}
+\begin{itemize}
+\item V stand for  the set of all infinite  sequences of complex numbers,\\
+such  as  $x=[x_{1}, x_{2}, x_{3}, ...]$   $y=[y_{1}, y_{2}, y_{3}, ...]$,  A sequence is a complex-valued  function  defined  on  the  set of positive  integers $N=\{1,2,3,...\}$. $x(n)$ is the value of the function $x$ at  the  argument n. 
+\item In the  set V, we define two operations:
+\begin{displaymath} 
+x+y=[{x_{1}+y_{1}}, {x_{2}+y_{2}}, {x_{3}+y_{3}},...]
+\end{displaymath}
+\begin{displaymath}
+{\lambda x} =[{\lambda x_{1}}, {\lambda x_{2}}, {\lambda x_{3}},...]
+\end{displaymath}
+\begin{displaymath}
+(x+y)_n=x_n+y_n
+\end{displaymath}
+\begin{displaymath}
+(\lambda x)_n=\lambda x_n
+\end{displaymath}
+with  the adoption of these definitions, V becomes a vector space. 
+\item $0$ element in V, namely,$0=[0,0,0,...]$
+\end{itemize}
+  % \XeTeXpicfile "./logo.jpg" xscaled 100 yscaled 100 %插图也没有问题
+\end{frame}
+
+%\subsection{basic  concepts} 
+
+\begin{frame}
+\frametitle{Basic  Concepts}
+\begin{itemize}
+\item  \textbf{Shift operator} or \textbf{Displacement operator} denoted by E and  defined by the equation 
+\begin{displaymath}
+Ex=[x_{2}, x_{3}, x_{4},\ldots]\quad where\quad x=[x_{1}, x_{2}, x_{3},\ldots]
+\end{displaymath}
+\begin{displaymath}
+(Ex)_n =x_{n+1} 
+\end{displaymath}
+\begin{displaymath}
+(EEx)_n = x_{n+2}
+\end{displaymath}
+\begin{displaymath}
+({E^k}x)_n = x_{n+k}
+\end{displaymath}
+\item \textbf{Linear differece operator} can be expressed  as linear combinations of powers of E. The general form  of  such an operator is
+\begin{displaymath}
+L=\sum_{i=0}^m c_{i}E^{i}  
+\end{displaymath}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Basic Concepts}
+\begin{itemize}
+\item  $E^0$ is defined  as the identity operator, 
+\begin{displaymath}
+(E^{0}x)_{n}=x_{n}
+\end{displaymath}
+\item  The linear difference operator make up a linear subspace in the set of all linear  operators from V to V. The powers of E provide a basis  for this  subspace.
+\item we could write  $L=p(E)$. \\
+Where $p$ is a polynomial called the \textbf{characteristic polynomial} of L and defined by
+\begin{displaymath}
+p(\lambda)=\sum_{i=0}^m c_{i}\lambda^{i}  
+\end{displaymath}
+\item The set $\{x:Lx=0\}$ is a linear subspace of V; it is called the  \textbf{null space} of L. 
+\end{itemize}
+\end{frame}
+
+%\subsection{basic  concepts }
+
+\begin{frame}
+\frametitle{Basic  Concepts}
+\begin{itemize}
+\item Let us  consider a concrete  example of L , say by  taking $c_0=2$, $c_1={-3}$, $c_2=1$,and  all other $c_i=0$. The resulting equation is a linear difference equation,can be written  in  three forms:
+\begin{displaymath}%\begin{eqnarray*}  
+{(E^{2}-3E^{1}+2E^{0})}x=0 
+\end{displaymath}
+\begin{displaymath}
+ x_{n+2}-3x_{n+1}+2x_{n}=0 \qquad (n\geq 1)  
+\end{displaymath}
+\begin{displaymath}
+p(E)x=0 \qquad     p(\lambda)=\lambda^{2}-3\lambda +2
+\end{displaymath}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Basic  Concepts }
+\begin{itemize}
+\item It is easy to generate sequences that solve. we can choose $x_{1}$ and $x_{2}$ arbitarily and then determine $x_{3}$,$x_{4}$,$...$ we can obtain the solutions  
+\begin{displaymath}
+[1, 0,{-2}, {-6},{-14},{-30},\ldots] 
+\end{displaymath}
+\begin{displaymath}
+[1, 1, 1, 1,\ldots]   
+\end{displaymath}
+\begin{displaymath}
+[2, 4, 8, 16,\ldots]
+\end{displaymath}
+\item Two solutions are obviously of the form $x_n=\lambda^{n}$, with $\lambda=1$ or $\lambda=2$. Putting the $x_{n}=\lambda^{n}$ in the yields.
+\begin{displaymath}
+\lambda^{n+2}-3\lambda^{n+1}+2\lambda^{n}=0
+\end{displaymath}
+\begin{displaymath}
+\lambda^{n}(\lambda-1)(\lambda-2)=0
+\end{displaymath} 
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+\begin{itemize}
+\item The other solution of the type sought-namely, $[0,0,0,...]$, this we call the  \textbf{trivial solution}. The solutions $u_{n}=1$ and $v_{n}=2^{n}$
+are a basis for the solution space.
+\item  Let $x$ be any solution, $x=\alpha u+\beta v$, the equation means that $x_{n}={\alpha u_{n}}+{\beta v_{n}}$ for all $n$.
+\item For $n=1$ and $n=2$, we have 
+\begin{displaymath}
+x_{1}=\alpha+2\beta
+\end{displaymath}
+\begin{displaymath}
+x_{2}=\alpha+4\beta
+\end{displaymath} 
+\item because the determinant of the matrix is not $0$,Equation uniquely determines $\alpha$ and $\beta$.
+\end{itemize}
+\end{frame}
+
+
+
+\begin{frame}
+\begin{itemize}
+\item If this equation is true for indices less than $n$, then it is true for $n$ because 
+\begin{displaymath}
+x_{n}=3x_{n-1}-2x_{n-2}=3(\alpha u_{n-1}+\beta v_{n-1})-2(\alpha u_{n-2}+\beta v_{n-2})=\alpha u_{n}+\beta v_{n}
+\end{displaymath}
+\item this example illustrates the case of simple roots of the characteristic polynomial. 
+\end{itemize}
+\end{frame}
+
+\subsection{Simple Roots}
+\begin{frame}
+\frametitle{Theorem on Null Space}
+\begin{itemize}
+\item 	If $p$ is a polynomial and $\lambda$ is a root of $p$, then one solution of the difference equation $p(E)x=0$ is $[\lambda, \lambda^{2}, \lambda^{3},...]$. If all the root of $p$ are simple and nonzero, then each solution of the difference equation is a linear combination of such special solutions.
+\end{itemize}  
+\end{frame}
+
+
+\subsection{Multiple Roots}
+\begin{frame}
+\frametitle{Multiple Roots}
+\begin{itemize}
+\item When $p$ has multiple roots, slove a difference equation $p(E)x=0$. Define $x(\lambda)=[\lambda, \lambda^{2}, \lambda^{3}, ...]$. If $p$ is any polynomial, we have seen that
+\begin{displaymath}
+p(E)x(\lambda)=p(\lambda)x(\lambda)
+\end{displaymath}
+A differentiation with respect to $\lambda$ yields
+\begin{displaymath}
+p(E)x'(\lambda)=p'(\lambda)x(\lambda)+p(\lambda)x'(\lambda)
+\end{displaymath}
+If $\lambda$ is a multiple root of $p$, then $p(\lambda)=p'(\lambda)=0$, $x(\lambda)$ and $x'(\lambda)$ are solutions of the difference equence.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Multiple Roots}
+\begin{itemize}
+\item If $\lambda$ is a root of $p$ having multiplicity $k$, then the following sequences are solutions of the difference equation $p(E)x=0$:
+\begin{displaymath}
+x(\lambda)=[\lambda, \lambda^{2}, \lambda^{3},...]
+\end{displaymath}
+\begin{displaymath}
+x'(\lambda)=[1, 2\lambda, 3\lambda^2,...]
+\end{displaymath}
+\begin{displaymath}
+x''(\lambda)=[0, 2, 6\lambda,...]
+\end{displaymath}
+\begin{displaymath}
+    .
+    .
+    .
+\end{displaymath}
+\begin{displaymath}
+x^{(k-1)}(\lambda)=\frac{d^{(k-1)}}{d\lambda^{(k-1)}}[\lambda, \lambda^{2}, \lambda^{3},...]
+\end{displaymath}
+   \end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Theorem on Basic for Null Space}
+\begin{itemize}
+\item Let $p$ be a polynomial satisfying $p(0)\neq0$. Then a basis for the null space of $p(E)$ is obtained as follows: With each root $\lambda$ of $p$ having multiplicity $k$, associate the basic solutions $x(\lambda)$, $x'(\lambda)$,...,$x^{(k-1)}(\lambda)$, where $x(\lambda)=[\lambda, \lambda^{2}, \lambda^{3},...]$
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{EXAMPLE 1}
+\begin{itemize}
+\item Determine the general solution of this difference equation: $4x_{n}+7x_{n-1}+2x_{n-2}-3x_{n-3}=0$
+\item Solution $p(\lambda)=4\lambda^{3}+7\lambda^{2}+2\lambda-1=(\lambda+1)^{2}(4\lambda-1)$ \\
+$p$ has a double root at $-1$ and a simple root at $\frac{1}{4}$. The basic solutions are
+\begin{displaymath}
+x(-1)=[-1, 1, -1, 1,...]
+\end{displaymath}
+\begin{displaymath}
+x'(-1)=[1, -2, 3, -4,...]
+\end{displaymath}
+\begin{displaymath}
+x(\frac{1}{4})=[\frac{1}{4}, \frac{1}{16}, \frac{1}{64}, ...]
+\end{displaymath}
+\item The general solution is $x_{n}=\lambda(-1)^n+\beta n(-1)^{(n-1)}+\gamma (\frac{1}{4})^n$
+\end{itemize}
+\end{frame}
+
+\subsection{Stable Difference Equations}
+\begin{frame}
+\frametitle{Stable Difference Equations}
+\begin{itemize}
+\item An element $x=[x_{1}, x_{2},...]$ of V is said to be bounded if there is a constant $c$ such that $|x_{n}|\leq c$ for all $n$. A difference equation of the form $p(E)x=0$ is said to be \textbf{stable} if all of its solutions are bounded.
+\newline
+\item Theorem on Stable Difference Equations \\
+For a polynomial p satisfying $p(0)\neq0$, these properties are equivalent:\\
+1.The difference equation $p(E)x=0$ is stable.\\
+2.All roots of satisfy $|z|\leq1$, and all multiple roots satisfy $|z|<1$
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{EXAMPLE 2}
+\begin{itemize}
+\item Determine whether this difference equation is stable:
+\begin{displaymath}
+4x_{n}+7x_{n-1}+2x_{n-2}-x_{n-3}=0
+\end{displaymath}
+\item Solution The given equation is of the form $p(E)x=0$, where $p(\lambda)=4\lambda^{3}+7\lambda^{2}+2\lambda-1$.\\
+p has a double root at $-1$ and a simple root at $\frac{1}{4}$. The equation is therefore unstable.
+\end{itemize}
+\end{frame}
+  
+
+
+
+\end{document}
