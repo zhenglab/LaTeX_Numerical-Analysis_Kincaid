@@ -1,0 +1,683 @@
+\documentclass[notheorems,mathserif,table,compress]{beamer}  %dvipdfm选项是关键,否则编译统统通不过
+%%------------------------常用宏包------------------------
+%%注意, beamer 会默认使用下列宏包: amsthm, graphicx, hyperref, color, xcolor, 等等
+\usepackage{fontspec,xunicode,xltxtra}  % for XeTeX
+\usepackage{verbatim}
+\usepackage{mathabx}
+\usepackage{amsfonts,amssymb}
+\usepackage{iplouclistings}
+%%------------------------ThemeColorFont------------------------
+%% Presentation Themes
+% \usetheme[<options>]{<name list>}
+\usetheme{Madrid}
+%% Inner Themes双精度计算
+% \useinnertheme[<options>]{<name>}
+%% Outer Themes
+% \useoutertheme[<options>]{<name>}
+\useoutertheme{miniframes} 
+%% Color Themes 
+%\usecolortheme[<options>]{<name list>}
+%% Font Themes
+\usefonttheme{serif}
+\setbeamertemplate{background canvas}[vertical shading][bottom=white,top=structure.fg!7] %%背景色, 上25%的蓝, 过渡到下白.
+\setbeamertemplate{theorems}[numbered]
+\setbeamertemplate{navigation symbols}{}   %% 去掉页面下方默认的导航条.
+\usepackage{zhfontcfg}
+%\setsansfont[Mapping=tex-text]{文泉驿正黑}  %% 需要fontspec宏包
+     %如果装了Adobe Acrobat,可在font.conf中配置Adobe字体的路径以使用其中文字体
+     %也可直接使用系统中的中文字体如SimSun,SimHei,微软雅黑 等
+     %原来beamer用的字体是sans family;注意Mapping的大小写,不能写错
+     %设置字体时也可以直接用字体名，以下三种方式等同：
+     %\setromanfont[BoldFont={黑体}]{宋体}
+     %\setromanfont[BoldFont={SimHei}]{SimSun}
+     %\setromanfont[BoldFont={"[simhei.ttf]"}]{"[simsun.ttc]"}
+%%------------------------MISC------------------------
+\graphicspath{{figures/}}         %% 图片路径. 本文的图片都放在这个文件夹里了.
+%%------------------------正文------------------------
+\begin{document}
+\XeTeXlinebreaklocale "zh"         % 表示用中文的断行
+\XeTeXlinebreakskip = 0pt plus 1pt % 多一点调整的空间
+%%----------------------------------------------------------
+%% This is only inserted into the PDF information catalog. Can be left
+%% out.
+%%%
+%% Delete this, if you do not want the table of contents to pop up at
+%% the beginning of each subsection:
+\AtBeginSection[]{                              % 在每个Section前都会加入的Frame
+  \frame<handout:0>{
+    \frametitle{Contents}\small
+    \tableofcontents[current,currentsubsection]
+  }
+}
+
+\AtBeginSubsection[]                            % 在每个子段落之前
+{
+  \frame<handout:0>                             % handout:0 表示只在手稿中出现
+  {
+    \frametitle{Contents}\small
+    \tableofcontents[current,currentsubsection] % 显示在目录中加亮的当前章节
+  }
+}
+
+%%----------------------------------------------------------
+\title[Numerical Analysis]{Numerical Analysis}
+\subtitle{Mathematics of Scientific Computing}
+\author[qiu]{主讲人~~~~~\textcolor{olive}{邱欣欣}\\
+    \quad 幻灯片制作~~\textcolor{olive}{邱欣欣}}
+\institute[中国海洋大学]{\small\textcolor{violet}{中国海洋大学~~信息科学与工程学院}}
+\date{2013~年~9~月~27~日}
+%\titlegraphic{\vspace{-6em}\includegraphics[height=7cm]{ouc}\vspace{-6em}}
+\frame{ \titlepage }
+%%----------------------------------------------------------
+\section*{Contents}
+\frame{\frametitle{Solution of Nonlinear Equations}\tableofcontents}
+%%----------------------------------------------------------
+\section{Fixed Points and Functional Iteration}
+
+%4
+\begin{frame}
+\frametitle{Fixed Points and Functional Iteration}
+\begin{itemize}
+\item A sequence of points is computed by a formula of the form
+\begin{equation}
+x_{n+1}=F(x_{n}) \quad(n\geq0) 
+\end{equation}
+
+The algorithm defined by such an equation is called \textsf{functional iteration}.\\
+In Newton's method, the function $F$ is given by
+\begin{displaymath}
+F(x)=x-\frac{f(x)}{f'(x)}
+\end{displaymath}
+
+whereas in Steffensen's method, we have
+\begin{displaymath}
+F(x)=x-\frac{[f(x)]^2}{f(x+f(x))-f(x)}
+\end{displaymath}
+
+\end{itemize}
+\end{frame}
+
+%5
+\begin{frame}
+\frametitle{Fixed Points and Functional Iteration}
+\begin{itemize}
+\item Suppose that
+\begin{displaymath}
+\lim_{n \to \infty}x_n=s
+\end{displaymath}
+ If $F$ is continuous, then 
+\begin{displaymath}
+F(s)=F(\lim_{n \to \infty}x_n)=\lim_{n\to\infty}F(x_n)=\lim_{n\to\infty}x_{n+1}=s
+\end{displaymath}
+
+Thus, $F(s)=s$, and we call $s$ a fixed point of the function $F$.
+\end{itemize}
+\begin{itemize}
+\item The theorem to be proved concerns \textsf{contractive mapping}. A mapping(or function) $F$ is said to be \textsf{contractive} if there exists a number $\lambda$ less than 1 such that
+\begin{equation}
+|F(x)-F(y)|\leq \lambda|x-y|
+\end{equation}
+
+for all points $x$ and $y$ in the domain of $F$.
+\end{itemize}
+\end{frame}
+
+%6
+\begin{frame}
+\frametitle{Contractive Mapping Theorem}
+\theoremstyle{plain}
+\newtheorem{theorem}{THEOREM}
+\begin{theorem}[Contractive Mapping Theorem]
+Let C be a closed subset of the real line. If F is a contractive mapping of C into C, then F has a unique fixed point. Moreover, this fixed point is the limit of every sequence obtained from Equation(1) with a starting point $x_0\in C$.
+\end{theorem}
+
+\begin{proof}
+We use the contractive property(2) together with Equation(1) to write
+\begin{displaymath}
+|x_n-x_{n-1}|=|F(x_{n-1})-F(x_{n-2})|\leq\lambda|x_{n-1}-x_{n-2}|
+\end{displaymath}
+
+This argument can be repeated to get
+\begin{displaymath}
+|x_n-x_{n-1}|\leq\lambda|x_{n-1}-x_{n-2}|\leq{\lambda}^2|x_{n-2}-x_{n-3}|\leq\ldots\leq{\lambda}^{n-1}|x_1-x_0|
+\end{displaymath}
+
+\end{proof}
+\end{frame}
+
+%7
+\begin{frame}
+\frametitle{Contractive Mapping Theorem}
+\begin{proof}
+Since $x_n$ can be written in the form
+\begin{displaymath}
+x_n=x_0+(x_1-x_0)+(x_2-x_1)+\ldots+(x_n-x_{n-1})
+\end{displaymath}
+
+We see that the sequence $[x_n]$ converges if and only if the series
+\begin{displaymath}
+\sum_{n=1}^{\infty}(x_n-x_{n-1})
+\end{displaymath}
+
+converges. It suffices to prove that the series
+\begin{displaymath}
+\sum_{n=1}^{\infty}|x_n-x_{n-1}|
+\end{displaymath}
+converges. 
+\end{proof}
+\end{frame}
+
+%8
+\begin{frame}
+\frametitle{Contractive Mapping Theorem}
+\begin{proof}
+This is easy because we can use the comparision test and the previous work
+\begin{displaymath}
+\sum_{n=1}^{\infty}|x_n-x_{n-1}|\leq\sum_{n=1}^{\infty}\lambda ^{n-1}|x_1-x_0|=\frac{1}{1-\lambda}|x_1-x_0|
+\end{displaymath}
+
+Let $s=\lim_{n\to \infty}x_n$. Then $F(s)=s$, as noted previously. \\
+As for the unicity of the fixed point, if $x$ and $y$ are fixed points, then 
+\begin{displaymath}
+|x-y|=|F(x)-F(y)|\leq\lambda|x-y|
+\end{displaymath}
+
+Since $\lambda<1,|x-y|=0$. Finally, note that the point $s$ that is obtained belongs to $C$ since $s$ is the limit of a sequence lying in $C$.
+\end{proof}
+\end{frame}
+
+%9
+\begin{frame}
+\frametitle{Fixed Points and Functional Iteration}
+\begin{description}
+\item[EXAMPLE] Use the Contractive Mapping Theorem to compute a fixed point of the function
+\begin{displaymath}
+F(x)=4+\frac{1}{3}\sin x
+\end{displaymath}
+
+\end{description}
+\begin{description}
+\item[Solution] By the Mean-Value Theorem, we have
+\begin{displaymath}
+|F(x)-F(y)|=\frac{1}{3}|\sin 2x-\sin 2y|=\frac{2}{3}|\cos 2\zeta||x-y|\leq\frac{2}{3}|x-y|
+\end{displaymath}
+
+for some $\zeta$ between $x$ and $y$. This shows that $F$ is contractive, with $\lambda=2/3$. By Theorem 1, $F$ has a fixed point. A computer program to compute this fixed point can be based on the following algorithm.
+\end{description}
+\end{frame}
+
+%10
+\begin{frame}
+\frametitle{Contractive Mapping Theorem}
+\lstinputlisting{./contractive.m}
+\end{frame}
+
+%11
+\begin{frame}
+\frametitle{Error Analysis}
+\begin{itemize}
+\item We suppose $F$ has a fixed point, $s$, and that a sequence $[x_n]$ has been defined by the formula $x_{n+1}=F(x_n)$. Let 
+\begin{displaymath}
+e_n=x_n-s
+\end{displaymath}
+
+If $F'$ exists and is continuous, then by the Mean-Value Theorem,
+\begin{displaymath}
+x_{n+1}-s=F(x_n)-F(s)=F'({\zeta}_n)(x_n-s)\quad or\quad e_{n+1}=F'({\zeta}_n)e_n
+\end{displaymath}
+
+where ${\zeta}_n$ is a point between $x_n$ and $s$. The condition $|F'(x)|<1$ for all $x$ ensures that errors decrease in magnitude. If $e_n$ is small, then ${\zeta}_n$ is near $s$, and $F'({\zeta}_n)\approx F'(s)$. One would expect rapid convergence if $F'(s)$ is small.
+\end{itemize}
+\end{frame}
+
+\section{Computing Roots of Polynomials}
+
+%13
+\begin{frame}
+\frametitle{Computing Roots of Polynomials}
+\begin{itemize}
+\item We write a polynomial in the form 
+\begin{equation}
+p(z)=a_n z^n+a_{n-1}z^{n-1}+\ldots+a_2 z^2+a_1z+a_0
+\end{equation}
+
+in which the coefficients $a_k$ and the variable $z$ may be complex numbers. If $a_n\neq0$, then $p$ has \textsf{degree} n. We are interested in finding the roots of $p$.
+\end{itemize}
+\begin{theorem}[Fundamental Theorem of Algebra]
+Every nonconstant polynomial has at least one root in the complex field.
+\end{theorem}
+
+\end{frame}
+
+%14
+\begin{frame}
+\frametitle{Fundamental Theorem of Algebra}
+\begin{proof}
+We want to show that $p(z_0)=0$ for some $z_0\in \mathbb{C}$. Since $p$ is not constant, $|p(z)|\to\infty$ when $|z|\to\infty$. Let $D$ be a disk centered at $0$ outside of which $|p(z)|\geq|p(0)|$. Let $z_0$ be a point where $inf_{z\in D}|P(z)|$ is attained. Since $0\in D$, $|P(z_0)|\leq|p(0)|$. Thus, $|p(z_0)|\leq|p(z)|$ for all $z\in \mathbb{C}$. Put $q(z)=p(z+z_0)$. We want to prove that $q(0)=0$, so that $p(z_0)=0$. Write $q(z)=c_0+c_j z^j+\ldots+c_n z^n=c_0+c_j z^j+z^{j+1}r(z)$, in which $c_j\neq0$ and $r$ is a polynomial. Now we want to prove that $c_0=0$.
+\end{proof}
+\end{frame}
+
+%15
+\begin{frame}
+\frametitle{Fundamental Theorem of Algebra}
+\begin{proof}
+Suppose $c_0\neq0$. Let $w$ be any complex number such that $c_j w^j=-c_0$. Define $N=sup_{0<\varepsilon<1}|r(\varepsilon w)|$. Select $\varepsilon$ in $(0,1)$ so small that $\varepsilon|w|^{j+1}N<|c_0|$. Then we obtain a contradiction as follows:
+\begin{equation*}
+\begin{split}
+|q(\varepsilon w)| & \leq|c_0+c_j \varepsilon^j w^j|+\varepsilon^{j+1}|w^{j+1}||r(\varepsilon w)| \\
+                   & =|c_0-c_0\varepsilon^j|+\varepsilon^j\varepsilon|w|^{j+1}N\\
+                   & <|c_0|(1-\varepsilon^j)+\varepsilon^j|c_0|=|c_0|=|q(0)|\\
+                   & =|p(z_0)|\leq|p(z_0+\varepsilon w)|=|q(\varepsilon w)|
+\end{split}
+\end{equation*}
+
+\end{proof}
+\end{frame}
+
+%16
+\begin{frame}
+\frametitle{Computing Roots of Polynomials}
+\begin{itemize}
+\item If the polynomial $p$, having degree $n$ at least 1, is divided by a linear factor $z-c$, the result ia a quotient $q$ and a remainder $r$. The latter is a complex number, and the former is a polynomial of degree $n-1$. We can represent the process by the equation
+\begin{displaymath}
+p(z)=(z-c)q(z)+r 
+\end{displaymath}
+
+\end{itemize}
+\begin{itemize}
+\item From this we see (by letting $z=c$) that $p(c)=r$. This fact is known as the \textsf{Remainder Theorem}. 
+\end{itemize}
+\begin{itemize}
+\item If $c$ is a root of $p$, then $r=0$. This implication is known as the \textsf{Factor Theorem}. 
+\end{itemize}
+\end{frame}
+
+%17
+\begin{frame}
+\frametitle{Computing Roots of Polynomials}
+\begin{itemize}
+\item Let us write $p(z)=(z-r_1)q_1(z)$, where $r_1$ is any root of $p$. The equation can be
+\begin{displaymath}
+p(z)=(z-r_1)(z-r_2)\ldots(z-r_n)q_n
+\end{displaymath}
+
+This proves that a polynomial of degree $n$ has a factorization into a product of linear factors, each corresponding to a root of $p$. It is clear that $p$ can have no other roots. Since some of the roots $r_k$ may be equal to each other, we see that a polynomial of degree $n$ can have at most $n$ roots.
+\end{itemize}
+\end{frame}
+
+%18
+\begin{frame}
+\frametitle{Computing Roots of Polynomials}
+\begin{theorem}[Theorem on Complex Roots of Polynomials]
+A polynomial of degree $n$ has exactly $n$ roots in the complex plane, it being agreed that each root shall be counted a number of times equal to its multiplicity.
+\end{theorem}
+
+\begin{theorem}[Localization Theorem]
+All roots of the polynomial in Equation(3) lie in the open disk whose center is at the origin of the complex plane and whose radius is
+\begin{displaymath}
+\rho=1+|a_n|^{-1}\max_{0\leq k<n}|a_k|
+\end{displaymath}
+
+\end{theorem}
+\end{frame}
+
+%19
+\begin{frame}
+\frametitle{Computing Roots of Polynomials}
+\begin{proof}
+Put $c=\max_{0\leq k<n}|a_k|$ so that $c|a_n|^{-1}=\rho-1$. If $c=0$, our result is trivially true. Hence, assume $c>0$. Then $\rho>1$. If $|z|\geq \rho$, then (because $\rho>1$)
+\begin{equation*}
+\begin{split}
+|p(z)| & \geq |a_n z^n|-|a_{n-1} z^{n-1}+\ldots+a_0| \\
+       & \geq|a_n z^n|-c\sum_{k=0}^{n-1}|z|^k\\
+       & >|a_n z^n|-c|z|^n(|z|-1)^{-1}\\
+       & =|a_n z^n|\{1-c|a_n|^{-1}(|z|-1)^{-1}\}\\
+       & \geq|a_n z^n|\{1-c|a_n|^{-1}(\rho-1)^{-1}\}=0
+\end{split}
+\end{equation*}
+
+\end{proof}
+\end{frame}
+
+%20
+\begin{frame}
+\frametitle{Computing Roots of Polynomials}
+Take the polynomial $p$ of Equation(3), and consider the function $s(z)=z^n p(1/z)$. Then
+\begin{equation*}
+\begin{split}
+s(z) & =z^n[a_n\left(\frac{1}{z}\right)^n+a_{n-1}\left(\frac{1}{z}\right)^{n-1}+\ldots+a_0]\\
+     & =a_n+a_{n-1}z+a_{n-2}z^2+\ldots+a_0 z^n
+\end{split}
+\end{equation*}
+
+This shows that $s$ is a polynomial of degree at most $n$. For a nonzero complex number $z_0$, the condition $p(z_0)=0$ is equivalent to the condition $s(1/z_0)=0$.
+\begin{theorem}[Theorem on Localization of Roots]
+If all the roots of s are in the disk $\{z:|z|\leq \rho\}$, then all the nonzero roots of p are outside the disk $\{z:|z|<\rho^{-1}\}$.
+\end{theorem}
+\end{frame}
+
+\subsection{Horner's Algorithm}
+
+%22
+\begin{frame}
+\frametitle{Horner's Algorithm}
+\begin{itemize}
+\item If a polynomial $p$ and a complex number $z_0$ are given, Horner's algorithm will produce the number $p(z_0)$ and the polynomial 
+\begin{displaymath}
+q(z)=\frac{p(z)-p(0)}{z-z_0}
+\end{displaymath}
+
+From this equation we have
+\begin{equation}
+p(z)=(z-z_0)q(z)+p(z_0)
+\end{equation}
+
+Let the unknown polynomial $q$ be represented by
+\begin{displaymath}
+q(z)=b_0+b_1 z+\ldots+b_{n-1} z^{n-1}
+\end{displaymath}
+
+Then  this form for $q(z)$ and the analogous for $p(z)$ are substituted into Equation(4).
+\end{itemize}
+\end{frame}
+
+%23
+\begin{frame}
+\frametitle{Horner's Algorithm}
+\begin{itemize}
+\item The coefficients of like powers of $z$ on the two sides of the equation can be set equal to each other.
+These equations arise from doing so:
+\begin{equation*}
+\begin{split}
+b_{n-1} & = a_n\\
+b_{n-2} & = a_{n-1}+z_0 b_{n-1}\\
+\vdots \\
+    b_0 & = a_1+z_0 b_1\\
+ p(z_0) & = a_0+z_0 b_0
+\end{split}
+\end{equation*}
+
+\end{itemize}
+\begin{itemize}
+\item The calculation can be carried out in the following arrangement
+\begin{tabular}{r|c c c c c}
+      & $a_n$ & $a_{n-1}$ & $a_{n-2}$ & $\ldots$ & $a_0$\\
+$z_0$ &       & $z_0 b_{n-1}$ & $z_0 b_{n-2}$ & $\ldots$ & $z_0 b_0$\\
+\hline
+      & $b_{n-1}$ & $b_{n-2}$ & $b_{n-3}$ & $\ldots$ & $b_{-1}$
+\end{tabular}
+
+\end{itemize}
+\end{frame}
+
+%24
+\begin{frame}
+\frametitle{Horner's Algorithm}
+\lstinputlisting{./Horner1.m}
+\end{frame}
+
+%25
+\begin{frame}
+\frametitle{Horner's Algorithm}
+\begin{itemize}
+\item A application of Horner's algorithm is in finding the Taylor expansion of a polynomial about any point. Let $p(z)$ be as in Equation(3), and suppose that we desire the cofficient $c_k$ in the equation
+\begin{equation*}
+\begin{split}
+p(z) & =a_n z^n+a_{n-1} z^{n-1}+\ldots+a_0\\
+     & =c_n(z-z_0)^n+c_{n-1}(z-z_0)^{n-1}+\ldots+c_0
+\end{split}
+\end{equation*}
+ 
+Notice that $p(z_0)=c_0$. The algorithm yields the polynomial
+\begin{displaymath}
+q(z)=\frac{p(z)-p(z_0)}{z-z_0}=c_n(z-z_0)^{n-1}+c_{n-1}(z-z_0)^{n-2}+\ldots+c_1
+\end{displaymath}
+
+This shows $c_1$ can be obtained by applying Horner's algorithm to the polynomial $q$ with point $z_0$ because $c_1=q(z_0)$. This process is repeated until all coefficients $c_k$ are found.
+\end{itemize}
+\end{frame}
+
+%26 
+\begin{frame}
+\frametitle{Horner's Algorithm}
+\begin{itemize}
+\item We call the algorithm described the \textsf{complete Horner's algorithm}.
+\lstinputlisting{./Horner2.m}
+\end{itemize}
+\end{frame}
+
+%27
+\begin{frame}
+\frametitle{Horner's Algorithm}
+\begin{itemize}
+\item We will show how Newton's iteration can be carried out on a polynomial. Here is a code that produces $\alpha=p(z_0)$ and $\beta=p'(z_0)$.
+\lstinputlisting{./Horner3.m}
+\end{itemize}
+\end{frame}
+
+%28
+\begin{frame}
+\frametitle{Horner's Algorithm}
+\begin{itemize}
+\item Then a code for taking M steps in Newton's method on the given polynomial, starting at $z_0$, would look like this: 
+\lstinputlisting{./NewtonH.m}
+\end{itemize}
+\end{frame}
+
+%29
+\begin{frame}
+\frametitle{Theorem on Horner's Method}
+\begin{theorem}[Theorem on Horner's Method]
+Let $p(x)=a_n x^n+\ldots+a_1 x+a_0$. Define pairs $(\alpha_j,\beta_j)$ for $j=n,n-1,\ldots,0$ by the algorithm
+\begin{displaymath}
+\left\{\begin{array}{ll}
+(\alpha_n,\beta_n)=(a_n,0)\\
+(\alpha_j,\beta_j)=(a_j+x\alpha_{j+1},\alpha_{j+1}+x\beta_{j+1}) & (n-1\geq j\geq 0)
+\end{array} \right.
+\end{displaymath}
+
+Then $\alpha_0=p(x)$ and $\beta_0=p'(x)$. 
+\end{theorem}
+\end{frame}
+
+%30
+\begin{frame}
+\frametitle{Theorem on Successive Newton Iterates}
+\begin{theorem}[Theorem on Successive Newton Iterates]
+Let $x_k$ and $x_{k+1}$ be two successive iterates when Newton's method is applied to a polynomial $p$ of degree $n$. Then there is a root of $p$ within distance $n|x_k-x_{k+1}|$ of $x_k$ in the complex plane.
+\end{theorem}
+\begin{proof}
+Let $r_1,r_2,\ldots,r_n$ be the roots of $p$. Then $p(z)=c\prod_{j=1}^n (z-r_j)$. The correction term in the Newton iteration is $-p(z)/p'(z)$. The derivative of $p$ is
+\begin{displaymath}
+p'(z)=c\sum_{k=1}^n \prod_{\substack{i=1 \\ i\neq k}}^n(z-r_i)=\sum_{k=1}^n p(z)/(z-r_k)=p(z)\sum_{k=1}^n (z-r_k)^{-1}
+\end{displaymath}
+
+\end{proof}
+\end{frame}
+
+%31
+\begin{frame}
+\frametitle{Theorem on Successive Newton Iterates}
+\begin{proof}
+For any $z$ (playing the role of $x_k$) there is an index $j$ for which $|z-r_j|\leq n|p(z)/p'(z)|$.\\ If no index $j$ satisfies the desired inequality, then for all $j$, $|z-r_j|> n|p(z)/p'(z)|$. From this it would follow that 
+\begin{displaymath}
+|z-r_j|^{-1}<\frac{1}{n}|p'(z)/p(z)|=\frac{1}{n}|\sum_{k=1}^n (z-r_k)^{-1}|\leq\frac{1}{n}\sum_{k=1}^n|(z-r_k)^{-1}|
+\end{displaymath}
+
+But this is not possible because the average of $n$ numbers cannot be greater than each of them.
+\end{proof}
+\end{frame}
+
+\subsection{Bairstow's Method}
+
+%33
+\begin{frame}
+\frametitle{Theorem on Real Quadratic Factor}
+\begin{theorem}[Theorem on Real Quadratic Factor]
+If $p$ is a polynomial whose coefficients are all real, and if $w$ is a nonreal root of $p$, then $\overline{w}$ is also a root, and $(z-w)(z-\overline w)$ is a real quadratic factor of $p$.
+\end{theorem}
+
+\begin{proof}
+Let $p(z)=a_n z^n+a_{n-1} z^{n-1}+\ldots+a_1 z+a_0$, with all $a_k$ being real. Since $w$ is a root of $p$, we have
+\begin{displaymath}
+0=a_n w^n+a_{n-1} w^{n-1}+\ldots+a_1 w+a_0
+\end{displaymath}
+
+Take the conjugate of both sides, the result is
+\begin{displaymath}
+0=a_n {\overline w}^n+a_{n-1} {\overline w}^{n-1}+\ldots+a_1 \overline w+a_0
+\end{displaymath}
+
+\end{proof}
+\end{frame}
+
+%34
+\begin{frame}
+\frametitle{Theorem on Quotient and Remainder}
+\begin{theorem}[Theorem on Quotient and Remainder]
+If the polynomial $p(z)=a_n z^n+a_{n-1} z^{n-1}+\ldots+a_1 z+a_0$ is divided by the quadratic polynomial $z^2-uz-v$, then the quotient and remainder
+\begin{equation*}
+\begin{split}
+q(z) & =b_n z^{n-2}+b_{n-1} z^{n-3}+\ldots+b_3 z+b_2\\
+r(z) & =b_1(z-u)+b_0
+\end{split}
+\end{equation*}
+
+can be computed recursively by setting $b_{n+1}=b_{n+2}=0$ and then using
+\begin{displaymath}
+b_k=a_k+ub_{k+1}+vb_{k+2} \qquad (n\geq k\geq 0)
+\end{displaymath}
+
+\end{theorem}
+\end{frame}
+
+%35
+\begin{frame}
+\frametitle{Theorem on Quotient and Remainder}
+\begin{proof}
+The relationship between $p,q$, and $r$ is expressed by 
+\begin{displaymath}
+p(z)=q(z)(z^2-uz-v)+r(z)
+\end{displaymath}
+
+In detail, this equation reads:
+\begin{displaymath}
+\sum_{k=0}^n a_kz^k=(\sum_{k=2}^n b_kz^{k-2})(z^2-uz-v)+b_1(z-u)+b_0
+\end{displaymath}
+
+If we equate the coefficients of $z^k$ on the two sides of this equation,
+\begin{equation*}
+\begin{split}
+a_k & =b_k- ub_{k+1}-vb_{k+2}  \qquad (0\leq k\leq n-2)\\
+a_{n-1} & =b_{n-1}-ub_n\\
+a_n &=b_n
+\end{split}
+\end{equation*}
+
+\end{proof}
+\end{frame}
+
+%36
+\begin{frame}
+\frametitle{Bairstow's Method}
+\begin{proof}
+In the division process above, $b_0$ and $b_1$ are functions of $u$ and $v$, and we wirte $b_0=b_0(u,v)$ and $b_1=b_1(u,v)$. In order that $q$ be a factor of $p$, the remainder $r$ should vanish; this leads to the two equations
+\begin{equation*}
+\begin{split}
+b_0(u,v)&=0\\
+b_1(u,v)&=0
+\end{split}
+\end{equation*}
+
+This pair of simultaneous nonlinear equation is solved by Newton's method. We require the paitial derivatives
+\begin{displaymath}
+c_k=\frac{\partial b_k}{\partial u}\qquad d_k=\frac{\partial b_{k-1}}{\partial v}\qquad (0\leq k\leq n)
+\end{displaymath}
+
+\end{proof}
+\end{frame}
+
+%37
+\begin{frame}
+\frametitle{Bairstow's Method}
+\begin{proof}
+These are obtained by differentiating the recurrence relation already established for $b_k$ in Theorem 9.
+\begin{equation*}
+\begin{split}
+c_k&=b_{k=1}+uc_{k+1}+vc_{k+2} \qquad(c_{n+1}=c_n=0)\\
+d_k&=b_{k=1}+ud_{k+1}+vd_{k+2} \qquad(d_{n+1}=d_n=0)
+\end{split}
+\end{equation*}
+
+Since these recurrence relation generate the same two sequences, we need the first. Starting values are assigned to $u$ and $v$. We seek corrections, donoted by $\delta u$ and $\delta v$, so that the equations 
+\begin{displaymath}
+b_0(u+\delta u,v+\delta v)=b_1(u+\delta u,v+\delta v)=0
+\end{displaymath}
+
+are sure.
+\end{proof}
+\end{frame}
+
+%38
+\begin{frame}
+\frametitle{Bairstow's Method}
+\begin{proof}
+We linearize these equations by writing
+\begin{equation*}
+\begin{split}
+b_0(u,v)+\frac{\partial b_0}{\partial u}\delta u +\frac{\partial b_0}{\partial u}\delta v&=0\\
+b_1(u,v)+\frac{\partial b_1}{\partial u}\delta u +\frac{\partial b_1}{\partial u}\delta v&=0
+\end{split}
+\end{equation*}
+
+In view of the preceding remarks, this system becomes
+\begin{displaymath}
+\begin{bmatrix}
+c_0 & c_1 \\
+c_1 & c_2 
+\end{bmatrix}
+\begin{bmatrix}
+\delta u\\
+\delta v
+\end{bmatrix}
+=-\begin{bmatrix}
+b_0(u,v) \\
+b_1(u,v)
+\end{bmatrix}
+\end{displaymath}
+
+\end{proof}
+\end{frame}
+
+%39
+\begin{frame}
+\frametitle{Bairstow's Method}
+\begin{proof}
+The solution of this system follows:
+\begin{equation*}
+\begin{split}
+\delta u&=(c_1 b_1-c_2 b_0)/J\\
+\delta v&=(c_1 b_0-c_0 b_1)/J\\
+J&=c_0 c_2-c_1^2
+\end{split}
+\end{equation*}
+
+Notice that $J$ is the Jacobian determinant for the pair of nonlinear function $b_0(u,v)$ and $b_1(u,v)$.
+\end{proof}
+\end{frame}
+
+%40
+\begin{frame}
+\frametitle{Bairstow's Method}
+\lstinputlisting{./Bairstow.m}
+\end{frame}
+
+%41
+\begin{frame}
+\frametitle{Theorem on the Jacobian in Bairstow's Method}
+\begin{theorem}[Theorem on the Jacobian in Bairstow's Method]
+Let $(u_0,v_0)$ be a point such that the roots of $z^2-u_0z-v_0$ are simple roots of $p$. The Jacobian in Bairstow's method is not 0 at $(u_0,v_0)$. 
+\end{theorem}
+\end{frame}
+
+\end{document}
