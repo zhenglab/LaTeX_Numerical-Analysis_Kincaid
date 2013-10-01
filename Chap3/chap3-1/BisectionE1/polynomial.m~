@@ -1,0 +1,2 @@
+function f=equa(x)
+    f=exp(1)^x-sin(x);
