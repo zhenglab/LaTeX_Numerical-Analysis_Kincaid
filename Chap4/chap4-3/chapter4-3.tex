@@ -1,0 +1,872 @@
+\documentclass[notheorems,mathserif,table,compress]{beamer}  %dvipdfm选项是关键,否则编译统统通不过
+%%------------------------常用宏包------------------------
+%%注意, beamer 会默认使用下列宏包: amsthm, graphicx, hyperref, color, xcolor, 等等
+\usepackage{fontspec,xunicode,xltxtra}  % for XeTeX
+\usepackage{verbatim}
+\usepackage{mathabx}
+\usepackage{amsfonts,amssymb}
+\usepackage{iplouclistings}
+%%------------------------ThemeColorFont------------------------
+%% Presentation Themes
+% \usetheme[<options>]{<name list>}
+\usetheme{Madrid}
+%% Inner Themes双精度计算
+% \useinnertheme[<options>]{<name>}
+%% Outer Themes
+% \useoutertheme[<options>]{<name>}
+\useoutertheme{miniframes} 
+%% Color Themes 
+%\usecolortheme[<options>]{<name list>}
+%% Font Themes
+\usefonttheme{serif}
+\setbeamertemplate{background canvas}[vertical shading][bottom=white,top=structure.fg!7] %%背景色, 上25%的蓝, 过渡到下白.
+\setbeamertemplate{theorems}[numbered]
+\setbeamertemplate{navigation symbols}{}   %% 去掉页面下方默认的导航条.
+\usepackage{zhfontcfg}
+%\setsansfont[Mapping=tex-text]{文泉驿正黑}  %% 需要fontspec宏包
+     %如果装了Adobe Acrobat,可在font.conf中配置Adobe字体的路径以使用其中文字体
+     %也可直接使用系统中的中文字体如SimSun,SimHei,微软雅黑 等
+     %原来beamer用的字体是sans family;注意Mapping的大小写,不能写错
+     %设置字体时也可以直接用字体名，以下三种方式等同：
+     %\setromanfont[BoldFont={黑体}]{宋体}
+     %\setromanfont[BoldFont={SimHei}]{SimSun}
+     %\setromanfont[BoldFont={"[simhei.ttf]"}]{"[simsun.ttc]"}
+%%------------------------MISC------------------------
+\graphicspath{{figures/}}         %% 图片路径. 本文的图片都放在这个文件夹里了.
+%%------------------------正文------------------------
+\begin{document}
+\XeTeXlinebreaklocale "zh"         % 表示用中文的断行
+\XeTeXlinebreakskip = 0pt plus 1pt % 多一点调整的空间
+%%----------------------------------------------------------
+%% This is only inserted into the PDF information catalog. Can be left
+%% out.
+%%%
+%% Delete this, if you do not want the table of contents to pop up at
+%% the beginning of each subsection:
+\AtBeginSection[]{                              % 在每个Section前都会加入的Frame
+  \frame<handout:0>{
+    \frametitle{Contents}\small
+    \tableofcontents[current,currentsubsection]
+  }
+}
+
+\AtBeginSubsection[]                            % 在每个子段落之前
+{
+  \frame<handout:0>                             % handout:0 表示只在手稿中出现
+  {
+    \frametitle{Contents}\small
+    \tableofcontents[current,currentsubsection] % 显示在目录中加亮的当前章节
+  }
+}
+
+%%----------------------------------------------------------
+\title[Numerical Analysis]{Numerical Analysis}
+\subtitle{Mathematics of Scientific Computing}
+\author[qiu]{主讲人~~~~~\textcolor{olive}{邱欣欣}\\
+    \quad 幻灯片制作~~\textcolor{olive}{邱欣欣}}
+\institute[中国海洋大学]{\small\textcolor{violet}{中国海洋大学~~信息科学与工程学院}}
+\date{2013~年~10~月~18~日}
+%\titlegraphic{\vspace{-6em}\includegraphics[height=7cm]{ouc}\vspace{-6em}}
+\frame{ \titlepage }
+%%----------------------------------------------------------
+\section*{Contents}
+\frame{\frametitle{Solving Systems of Linear Equations}\tableofcontents}
+%%----------------------------------------------------------
+\section{Pivoting and Constructing an algorithm}
+
+\subsection{Basic Gaussian Elimination}
+
+%5
+\begin{frame}
+\frametitle{Basic Gaussian Elimination}
+\begin{itemize}
+\item 
+\begin{displaymath}
+\begin{bmatrix}
+a_{11} & a_{12} & a_{13} & \ldots & a_{1n}\\
+a_{21} & a_{22} & a_{23} & \ldots & a_{2n}\\
+a_{31} & a_{32} & a_{33} & \ldots & a_{3n}\\
+\vdots & \vdots & \vdots & \ddots & \vdots \\
+a_{n1} & a_{n2} & a_{n3} & \ldots & a_{nn}\\
+\end{bmatrix}
+\begin{bmatrix}
+x_1\\
+x_2\\
+x_3\\
+\vdots\\
+x_n
+\end{bmatrix}
+=\begin{bmatrix}
+b_1\\
+b_2\\
+b_3\\
+\vdots\\
+b_n
+\end{bmatrix}
+\end{displaymath}
+
+\begin{displaymath}
+Ax=b
+\end{displaymath}
+
+\end{itemize}
+\end{frame}
+
+%6
+\begin{frame}
+\frametitle{Basic Gaussian Elimination}
+\begin{itemize}
+\item For the process, there are $n−1$ principal steps. In the first step, we refer to the first equation as the first \textsf{pivot equation} and to $a_{11}$ as the first \textsf{pivot element}. For the remaining equations $(2\leq i\leq n)$,
+
+\begin{eqnarray*}
+\left \{\begin{array}{ll}
+a_{ij}\leftarrow a_{ij}-(\cfrac{a_{i1}}{a_{11}})a_{1j} \qquad (1\leqq j\leqq n)\\
+b_{i}\leftarrow b_{i}-(\cfrac{a_{i1}}{a_{11}})b_{1} 
+\end{array} \right.
+\end{eqnarray*}
+
+Note that the quantities $(a_{i1}/a_{11})$ are the \textsf{multipliers}.
+\end{itemize}
+\end{frame}
+
+%7
+\begin{frame}
+\frametitle{Basic Gaussian Elimination}
+\begin{itemize}
+\item  Just prior to the $k$th step in the forward elimination, the system will appear as follows:
+\begin{displaymath}
+\begin{bmatrix}
+a_{11} & a_{12} & a_{13} & \ldots &     & \ldots  & & \ldots & a_{1n}\\
+0      & a_{22} & a_{23} & \ldots &     & \ldots  & & \ldots & a_{2n}\\
+0      & 0      & a_{33} & \ldots &     & \ldots  & & \ldots & a_{3n}\\
+\vdots & \vdots & \vdots & \ddots &     &         & &        &\vdots \\
+0      & 0      & 0      & \ldots &a_{kk}& \ldots & a_{kj} & \ldots & a_{kn}\\
+\vdots & \vdots & \vdots & \vdots &\vdots&        & \vdots &        &\vdots \\
+0      & 0      & 0      & \ldots & a_{ik}&\ldots & a_{ij} & \ldots & a_{in}\\
+\vdots & \vdots & \vdots & \vdots &\vdots&        & \vdots &        &\vdots \\
+0      & 0      & 0      & \ldots & a_{nk}&\ldots & a_{nj} & \ldots & a_{nn}
+\end{bmatrix}
+\begin{bmatrix}
+x_1\\
+x_2\\
+x_3\\
+\vdots\\
+x_k\\
+\vdots\\
+x_i\\
+\vdots\\
+x_n
+\end{bmatrix}
+=\begin{bmatrix}
+b_1\\
+b_2\\
+b_3\\
+\vdots\\
+b_k\\
+\vdots\\
+b_i\\
+\vdots\\
+b_n
+\end{bmatrix}
+\end{displaymath}
+
+\end{itemize}
+\end{frame}
+
+%8
+\begin{frame}
+\frametitle{Basic Gaussian Elimination}
+\begin{itemize}
+\item We compute for each remaining equation ($k+1\leq i\leq n$)
+\begin{eqnarray*}
+\left \{\begin{array}{ll}
+a_{ij}\leftarrow a_{ij}-(\cfrac{a_{ik}}{a_{kk}})a_{kj} \qquad (k\leqq j\leqq n)\\
+b_{i}\leftarrow b_{i}-(\cfrac{a_{ik}}{a_{kk}})b_{k} 
+\end{array} \right.
+\end{eqnarray*}
+
+\end{itemize}
+\begin{itemize}
+\item Obviously, we must assume that all the divisors in this algorithm are nonzero.
+\end{itemize}
+
+\end{frame}
+
+%9
+\begin{frame}
+\frametitle{Pseudocode}
+\textsf{input} $n,(a_{ij}),(b_i)$\\
+\textsf{for} $k=1$ \textsf{to} $n−1$ \textsf{do}\\
+   \textsf{for} $i=k+1$ \textsf{to} $n$ \textsf{do}\\
+        $z\leftarrow a_{ik}/a_{kk}$\\
+        $a_{ik}\leftarrow 0$\\
+        \textsf{for} $j=k+1$ \textsf{to} $n$ \textsf{do}\\
+             $a_{ij}\leftarrow a_{ij}−za_{kj}$\\
+        \textsf{end do}\\
+        $b_i\leftarrow b_i−zb_k$\\
+   \textsf{end do}\\
+\textsf{end do}\\
+\textsf{output} $(a_{ij}),(b_i)$
+\end{frame}
+
+%10
+\begin{frame}
+\frametitle{Basic Gaussian Elimination}
+\lstinputlisting{./Gaussian.m}
+\end{frame}
+
+%11
+\begin{frame}
+\lstinputlisting{./GaussianBacksub.m}
+\end{frame}
+
+%12
+\begin{frame}
+\frametitle{Basic Gaussian Elimination}
+\begin{itemize}
+\item  $A=A^{(1)}\rightarrow A^{(2)}\rightarrow \ldots \rightarrow A^{(n)}$
+\begin{displaymath}
+\begin{bmatrix}
+a_{11}^{(k)} & \ldots & a_{1,k-1}^{(k)} & a_{1k}^{(k)} & \ldots & a_{1j}^{(k)} & \ldots & a_{1n}^{(k)}\\
+\vdots & \ddots &  & \vdots &     & \vdots        & & \vdots \\
+0 & \ldots & a_{k-1,k-1}^{(k)} & a_{k-1,k}^{(k)} & \ldots & a_{k-1,j}^{(k)} & \ldots & a_{k-1,n}^{(k)}\\
+0 & \ldots & 0 & a_{kk}^{(k)} & \ldots & a_{kj}^{(k)} & \ldots & a_{kn}^{(k)}\\
+0 & \ldots & 0 & a_{k+1,k}^{(k)} & \ldots & a_{k+1,j}^{(k)} & \ldots & a_{k+1,n}^{(k)}\\
+\vdots &  & \vdots & \vdots & &  \vdots     & & \vdots \\
+0 & \ldots & 0 & a_{ik}^{(k)} & \ldots & a_{ij}^{(k)} & \ldots & a_{in}^{(k)}\\
+\vdots &  & \vdots & \vdots & &  \vdots     & & \vdots \\
+0 & \ldots & 0 & a_{nk}^{(k)} & \ldots & a_{nj}^{(k)} & \ldots & a_{nn}^{(k)}
+\end{bmatrix}
+\end{displaymath}
+
+\end{itemize}
+\end{frame}
+
+%13
+\begin{frame}
+\frametitle{Basic Gaussian Elimination}
+\begin{itemize}
+\item Our task is to describe how $A^{(k+1)}$ is obtained from $A^{(k)}$. The formula is 
+\begin{displaymath}
+a_{ij}^{(k+1)}=\left\{ \begin{array}{ll}
+a_{ij}^{(k)} & \textrm{if $i\leq k$}\\
+a_{ij}^{(k)}-(a_{ik}^{(k)}/a_{kk}^{(k)})a_{kj}^{(k)} & \textrm{if $i\geq k+1 and\; j\geq k+1$}\\
+0 & \textrm{if $i\geq k+1 and\; j\leq k$}
+\end{array} \right.
+\end{displaymath}
+
+Then we set $U=A^{(n)}$ and define $L$ by
+\begin{displaymath}
+l_{ik}=\left\{ \begin{array}{ll}
+a_{ik}^{(k)}/a_{kk}^{(k)} & \textrm{if $i\geq k+1$}\\
+1 & \textrm{if $i=k$}\\
+0 & \textrm{if $i\leq k-1$}
+\end{array} \right.
+\end{displaymath}
+\end{itemize}
+\end{frame}
+
+%14
+\begin{frame}
+\frametitle{Basic Gaussian Elimination}
+\theoremstyle{plain}
+\newtheorem{theorem}{THEOREM}
+\begin{theorem}[Theorem on Nonzero Privots]
+If all the pivot elements $a_{kk}^{(k)}$ are nonzero in the process just described, then $A=LU$.
+\end{theorem}
+
+\begin{proof}
+Observe that $a_{ij}^{(k+1)}=a_{ij}^{(k)}$ if $i\leq k$ or $j\leq k-1$. Note $u_{kj}=a_{kj}^{(n)}=a_{kj}^{(k)}$, $l_{ik}=0$ if $k>i$, and $u_{kj}=0$ if $k>j$. Now let $i\leq j$. We have
+\begin{eqnarray*}
+(LU)_{ij}&=&\sum_{k=1}^{n}l_{ik}u_{kj}=\sum_{k=1}^{i}l_{ik}u_{kj}^{(k)}=\sum_{k=1}^{i}l_{ik}a_{kj}^{(k)}\\
+&=&\sum_{k=1}^{i-1}l_{ik}a_{kj}^{(k)}+l_{ii}a_{ij}^{(i)}\\
+\end{eqnarray*}
+
+\end{proof}
+\end{frame}
+
+%15
+\begin{frame}
+\frametitle{Basic Gaussian Elimination}
+\begin{proof}
+\begin{eqnarray*}
+&=&\sum_{k=1}^{i-1}(a_{ik}^{(k)}/a_{kk}^{(k)})a_{kj}^{(k)}+a_{ij}^{(i)}\\
+&=&\sum_{k=1}^{i-1}(a_{ij}^{(k)}-a_{ij}^{(k+1)})+a_{ij}^{(i)}\\
+&=&a_{ij}^{(1)}=a_{ij}
+\end{eqnarray*}
+
+\end{proof}
+\end{frame}
+
+%16
+\begin{frame}
+\frametitle{Basic Gaussian Elimination}
+\begin{proof} 
+If $i>j$, then 
+\begin{eqnarray*}
+(LU)_{ij}&=&\sum_{k=1}^{n}l_{ik}u_{kj}=\sum_{k=1}^{j}l_{ik}a_{kj}^{(k)}\\
+&=&\sum_{k=1}^{j}(a_{ij}^{(k)}-a_{ij}^{(k+1)})\\
+&=&a_{ij}^{(1)}-a_{ij}^{j+1}\\
+&=&a_{ij}^{(1)}=a_{ij}
+\end{eqnarray*}
+Since $a_{ij}^{(k)}=0$ if $i\geq j+1$ and $k\geq j+1$.
+\end{proof}
+
+\end{frame}
+
+\subsection{Pivoting}
+
+%18
+\begin{frame}
+\frametitle{Pivoting} 
+\begin{itemize}
+\item The first example
+\begin{displaymath}
+\begin{bmatrix}
+0 & 1\\
+1 & 1
+\end{bmatrix}
+\begin{bmatrix}
+x_1\\
+x_2
+\end{bmatrix}=
+\begin{bmatrix}
+1\\
+2
+\end{bmatrix}
+\end{displaymath}
+
+The algorithm fails because $a_{11}=0$. 
+\end{itemize}
+\end{frame}
+
+%19
+\begin{frame}
+\frametitle{Pivoting} 
+\begin{itemize}
+\item Another example, which $\varepsilon$ is a small number different from 0.
+\begin{displaymath}
+\begin{bmatrix}
+\varepsilon & 1\\
+1 & 1
+\end{bmatrix}
+\begin{bmatrix}
+x_1\\
+x_2
+\end{bmatrix}=
+\begin{bmatrix}
+1\\
+2
+\end{bmatrix}
+\end{displaymath}
+
+The solution is 
+\begin{displaymath}
+\left\{ \begin{array}{ll}
+x_2=(2-\varepsilon^{-1})/(1-\varepsilon^{-1})\approx 1\\
+x_1=(1-x_2)\varepsilon^{-1}\approx 0
+\end{array} \right.
+\end{displaymath}
+
+But the correct solution is 
+\begin{displaymath}
+\left\{ \begin{array}{ll}
+x_1=1/(1-\varepsilon)\approx 1\\
+x_2=(1-2\varepsilon)/(1-\varepsilon)\approx 1
+\end{array} \right.
+\end{displaymath}
+
+\end{itemize}
+\end{frame}
+
+%20
+\begin{frame}
+\frametitle{Pivoting} 
+\begin{itemize}
+\item Interchanging the two equaions in example 1
+\begin{displaymath}
+\begin{bmatrix}
+1 & 1\\
+\varepsilon & 1\\
+\end{bmatrix}
+\begin{bmatrix}
+x_1\\
+x_2
+\end{bmatrix}=
+\begin{bmatrix}
+2\\
+1
+\end{bmatrix}
+\end{displaymath}
+
+The solution is 
+\begin{displaymath}
+\left\{ \begin{array}{ll}
+x_2=(1-2\varepsilon)/(1-\varepsilon)\approx 1\\
+x_1=(2-x_1)\approx 1
+\end{array} \right.
+\end{displaymath}
+
+\end{itemize}
+\end{frame}
+
+\subsection{Gaussian Elimination with Scaled Row Pivoting}
+
+%22
+\begin{frame}
+\frametitle{Gaussian Elimination with Scaled Row Pivoting}
+\begin{displaymath}
+Ax=b
+\end{displaymath} 
+
+The algorithm has two parts: a \textsf{factorization phase} and a \textsf{solution phase}.
+\begin{itemize}
+\item The factorization phase is designed to produce the $LU$-decomposition of $PA$, the permuted linear system is $PAx=Pb$. $P$ is a permutation matrix.
+\begin{itemize}
+\item The factorization is obtained from a modified Gaussian elimination algorithm to be explained below.
+\end{itemize}
+\item In the solution phase, we consider two equations $Lz=Pb$ and $Ux=z$.
+\begin{itemize}
+\item $b$ is rearranged according to $P$ and $b\leftarrow Pb$.
+\item $Lz=b$ is solved for $z$ and $b\leftarrow L^{-1}b$.
+\item Then back substitution is used to solve $Ux=b$ for $x_n, x_{n-1}, \ldots, x_1$.
+\end{itemize}
+
+\end{itemize}
+\end{frame}
+
+%23
+\begin{frame}
+\frametitle{Gaussian Elimination with Scaled Row Pivoting} 
+\begin{itemize}
+\item Computing the \textsf{scale} of each row. We put
+\begin{displaymath}
+s_i=\max_{1\leq j\leq n}|a_{ij}|=\max\{|a_{i1}|,|a_{i2}|, \ldots, |a_{in}|\} \qquad (1\leq i\leq n)
+\end{displaymath} 
+These $n$ numbers are recorded in the scale vector $s=[s_1, s_2, \ldots, s_n]$.
+\item Firstly, define the index vector $p$ to be $[p_1, p_2, \ldots, p_n]=\newline[1, 2, \ldots, n]$. Selecting an index $j$ for which $|a_{i1}|/s_i$ is largest. Interchanging $p_j$ with $p_1$ in the index vector. Next, use multipliers $(a_{p_i1}/a_{p_11})$ times row 1 , and subtract from equations $p_i$ for $2\leq i\leq n$.
+\item At step $k$, select $j$ to be the first index corresponding to the largest of the ratios, $\{|a_{p_ik}|/s_{p_i}\quad k\leq i\leq n\}$, interchanging $p_j$ with $p_k$ in $p$.
+\end{itemize}
+\end{frame}
+
+%24
+\begin{frame}
+\frametitle{Pseudocode for Factorization phase} 
+\begin{itemize}
+\item 
+\textsf{input} $n,(a_{ij})$\\
+\textsf{for} $i=1$ \textsf{to} $n$ \textsf{do}\\
+$p_i\leftarrow i$\\
+$smax\leftarrow 0$\\
+for $j=1$ to $n$ do\\
+$smax\leftarrow max\,(smax, |a_{ij}|)$\\
+\textsf{end do}\\
+$s_i\leftarrow smax$\\
+\textsf{end do}\\
+\end{itemize}
+\end{frame}
+
+%25
+\begin{frame}
+\begin{itemize}
+\item 
+\textsf{for} $k=1$ \textsf{to} $n−1$ \textsf{do}\\
+$rmax\leftarrow 0$\\
+\textsf{for} $i=k$ \textsf{to} $n$ \textsf{do}\\
+$r\leftarrow|a_{p_ik}/s_{p_{i}}|$\\
+if $(r>rmax)$ then\\
+$rmax\leftarrow r$\quad
+$j\leftarrow i$\\
+\textsf{end if}\\
+\textsf{end do}\\
+$p_j\leftrightarrow p_k$\\
+\textsf{for} $i=k+1$ \textsf{to} $n$ \textsf{do}\\
+$z\leftarrow a_{p_ik}/a_{p_kk};a_{p_ik}\leftarrow z$\\
+\textsf{for} $j=k+1$ \textsf{to} $n$ \textsf{do}\\
+$a_{p_ij}\leftarrow a_{p_ij}−za_{p_kj}$\\
+\textsf{end do}\\
+\textsf{end do}\\
+\textsf{end do}\\
+\textsf{output} $(a_{ij}),(p_i)$\\
+\end{itemize}
+\end{frame}
+
+%26
+\begin{frame}
+\frametitle{Pseudocode for Solution phase} 
+\begin{itemize}
+\item \textsf{for} $k=1$ \textsf{to} $n−1$ \textsf{do}\\
+\textsf{for} $i=k+1$ \textsf{to} $n$ \textsf{do}\\
+$b_{p_i}\leftarrow b_{p_i}−a_{p_ik}b_{p_k}$\\
+\textsf{end do}\\
+\textsf{end do}\\
+for $i=n$ to $1$ step -1 do\\
+$x_i\leftarrow (b_{p_i}-\sum_{j=i+1}^{n}a_{p_ij}x_j)/a_{p_ii}$\\
+\textsf{end do}\\
+\textsf{output} $(x_i)$
+\end{itemize}
+\end{frame}
+
+%27
+\begin{frame} 
+\lstinputlisting{./ScaleGaussian1.m}
+\end{frame}
+
+%28
+\begin{frame}
+\lstinputlisting{./ScaleGaussian2.m}
+\end{frame}
+
+\subsection{Factorizations $PA=LU$}
+
+%30
+\begin{frame}
+\frametitle{Factorizations $PA=LU$} 
+\begin{itemize}
+\item Let $p_1, p_2,\ldots, p_n$ be the indices of the rows in the order in which they become pivoting rows. Let $A^{(1)}=A$, and define $A^{(2)}, A^{(3)},\ldots, A^{(n)}$ recursively by the formula
+\begin{displaymath}
+a_{p_ij}^{(k+1)}=\left\{ \begin{array}{ll}
+a_{p_ij}^{(k)} & \textrm{if $i\leq k\ or\ i>k>j$}\\
+a_{p_ij}^{(k)}-(a_{p_ik}^{(k)}/a_{p_kk}^{(k)})a_{p_kj}^{(k)} & \textrm{if $i>k\ and\ j>k$}\\
+a_{p_ik}^{(k)}/a_{p_kk}^{(k)} & \textrm{if $i>k\ and\; j=k$}
+\end{array} \right.
+\end{displaymath}
+
+\begin{theorem}[Theorem on $LU$ Factorization of $PA$]
+Define a permutation matrix $P$ whose elements are $P_{ij}=\delta_{p_ij}$. Define an upper triangular matrix $U$ whose elements are $u_{ij}=a_{p_ij}^{(n)}$ if $j\geq i$. Define a unit lower triangular matrix $L$ whose elements are $l_{ij}=a_{p_ij}^{(n)}$ if $j<i$. Then $PA=LU$.
+\end{theorem}
+\end{itemize}
+\end{frame}
+
+%31
+\begin{frame}
+\frametitle{Factorizations $PA=LU$} 
+\begin{proof}
+From the recursive formula, we have 
+\begin{eqnarray*}
+u_{kj}&=&a_{p_kj}^{(n)}=a_{p_kj}^{(k)}\qquad (j\geq k)\\
+l_{ik}&=&a_{p_ik}^{(n)}=a_{p_ik}^{(k+1)}=a_{p_ik}^{(k)}/a_{p_kk}^{(k)}\qquad (i\geq k)
+\end{eqnarray*}
+
+Because the row $p_k$ in $A^{(n)}$ became fixed in step $k$, and column $k$ in $A^{(n)}$ became fixed in step $k+1$. Thus
+\begin{eqnarray*}
+a_{p_kj}^{(n)}=a_{p_kj}^{(k)}\qquad a_{p_ik}^{(n)}=a_{p_ik}^{(k+1)}
+\end{eqnarray*}
+\end{proof}
+\end{frame}
+
+%32
+\begin{frame}
+\frametitle{Factorizations $PA=LU$} 
+\begin{proof}
+Suppose that $i\leq j$.
+\begin{eqnarray*}
+(LU)_{ij}&=&\sum_{k=1}^{i}l_{ik}u_{kj}\\
+&=&\sum_{k=1}^{i-1}(a_{p_ik}^{(k)}/a_{p_kk}^{(k)})a_{p_kj}^{(k)}+l_{ii}a_{p_ij}^{(i)}\\
+&=&\sum_{k=1}^{i-1}(a_{p_ij}^{(k)}-a_{p_ij}^{(k+1)})+a_{p_ij}^{(i)}\\
+&=&a_{p_ij}^{(1)}=a_{p_ij}
+\end{eqnarray*}
+\end{proof}
+
+\end{frame}
+
+%33
+\begin{frame}
+\frametitle{Factorizations $PA=LU$} 
+\begin{proof}
+If $i>j$, then 
+\begin{eqnarray*}
+(LU)_{ij}&=&\sum_{k=1}^{j}l_{ik}u_{kj}\\
+&=&\sum_{k=1}^{j-1}(a_{p_ik}^{(k)}/a_{p_kk}^{(k)})a_{p_kj}^{(k)})+(a_{p_ij}^{(j)}/a_{p_jj}^{(j)})\\
+&=&\sum_{k=1}^{j-1}(a_{p_ij}^{(k)}-a_{p_ij}^{(k+1)})+a_{p_ij}^{(j)}\\
+&=&a_{p_ij}^{(1)}=a_{p_ij}
+\end{eqnarray*}
+
+\end{proof}
+\end{frame}
+
+%34
+\begin{frame}
+\frametitle{Factorizations $PA=LU$} 
+\begin{proof}
+And,
+\begin{eqnarray*}
+(PA)_{ij}=\sum_{k=1}^nP_{ik}a_{kj}=\sum_{k=1}^n\delta_{p_ik}a_{kj}=a_{p_ij}
+\end{eqnarray*}
+So for all pairs $(i,j)$, that
+\begin{eqnarray*}
+(PA)_{ij}=(LU)_{ij}
+\end{eqnarray*}
+\end{proof}
+
+\end{frame}
+
+%35
+\begin{frame}
+\frametitle{Factorizations $PA=LU$} 
+\begin{theorem}[Theorem on Solving $PA=LU$]
+If the factorization $PA=LU$ is produced from the Gaussian algorithm with scaled row pivoting, then the solution of $Ax=b$ is obtained by first solving $Lz=Pb$ and then solving $Ux=z$. Similarly, the solution of $y^TA=c^T$ is obtained by solving $U^Tz=c$ and then $L^TPy=z$.
+\end{theorem}
+\end{frame}
+
+%36
+\begin{frame}
+\frametitle{Pseudocode in terms of $L$ and $U$} 
+\begin{itemize}
+\item 
+\textsf{input} $n,(l_{ij}),(u_{ij}),(b_i),(p_i)$\\
+\textsf{for} $i=1$ \textsf{to} $n$ \textsf{do}\\
+$z_i\leftarrow b_{p_i}-\sum_{j=1}^{i-1}l_{ij}z_j$\\
+\textsf{end do}\\
+\textsf{for}  $i=n$ \textsf{to} 1 step -1 \textsf{do}\\
+$x_i\leftarrow (z_i-\sum_{j=i+1}^n u_{ij}x_j)/u_{ii}$\\
+\textsf{end do}\\
+\textsf{output} $(x_i)$
+\end{itemize}
+\end{frame}
+
+%37
+\begin{frame}
+\frametitle{Pseudocode in terms of $L$ and $U$} 
+\begin{itemize}
+\item 
+\textsf{input} $n,(a_{ij}),(b_i),(p_i)$\\
+\textsf{for} $i=1$ \textsf{to} $n$ \textsf{do}\\
+$z_i\leftarrow b_{p_i}-\sum_{j=1}^{i-1}a_{p_ij}z_j$\\
+\textsf{end do}\\
+\textsf{for} $i=n$ \textsf{to} 1 step -1 \textsf{do}\\
+$x_i\leftarrow (z_i-\sum_{j=i+1}^n a_{p_ij}x_j)/a_{p_ii}$\\
+\textsf{end do}\\
+\textsf{output} $(x_i)$
+\end{itemize}
+\end{frame}
+
+%38
+\begin{frame}
+\frametitle{Pseudocode for $y^TA=c^T$} 
+\begin{itemize}
+\item 
+\textsf{input} $n,(a_{ij}),(c_i),(p_i)$\\
+\textsf{for} $j=1$ \textsf{to} $n$ \textsf{do}\\
+$z_j\leftarrow (c_i-\sum_{i=1}^{j-1}a_{p_ij}z_i)/a_{p_jj}$\\
+\textsf{end do}\\
+\textsf{for} $j=n$ \textsf{to} 1 step -1 \textsf{do}\\
+$y_{p_j}\leftarrow z_j-\sum_{i=j+1}^n a_{p_ij}y_{p_i}$\\
+\textsf{end do}\\
+\textsf{output} $(x_i)$
+\end{itemize}
+\end{frame}
+
+\subsection{Operation Counts}
+
+%40
+\begin{frame}
+\frametitle{Operation Counts} 
+\begin{theorem}[Theorem on Long Operations]
+If Gaussian elimination is used with scaled row pivoting, then the solution of the system $Ax=b$, with fixed A, and m different vectors b, involves approximately
+\begin{displaymath}
+\frac{1}{3}n^3+(\frac{1}{2}+m)n^2
+\end{displaymath}
+long operations (multiplications or divisions).
+\end{theorem}
+
+\end{frame}
+
+%41
+\begin{frame}
+\frametitle{Factorizations $PA=LU$} 
+\begin{proof}
+Consider the first major step. 
+\begin{itemize}
+\item Define $p_1$ involves $n$ divisions ($n$ ops).
+\item For each of the $n-1$ rows, a multiplier is computed (1 op), then a multiple of row $p_1$ is subtracted from $p_i$ for $2\leq i\leq n$. So the multiplier and the elimination process consume $n$ ops per row.
+\item Since $n-1$ rows are processed, we have $n(n-1)$ ops. So the total is $n^2$ ops.
+\end{itemize}
+For the entire calculation, the factorization requires
+\begin{displaymath}
+n^2+(n-1)^2+\ldots+2^2=\frac{1}{3}n^3+\frac{1}{2}n^2+\frac{1}{6}n-1\approx\frac{1}{3}n^3+\frac{1}{2}n^2
+\end{displaymath}
+long operations.
+\end{proof}
+
+\end{frame}
+
+%42
+\begin{frame}
+\frametitle{Operation Counts} 
+\begin{proof}
+\begin{itemize}
+\item In updating the $b$, there are $n-1$ steps. In the first, there are $n-1$ long operations. In the second, there are $n-2$, and so on. The total is
+\begin{displaymath}
+(n-1)+(n-2)+\ldots+1=\frac{1}{2}n^2-\frac{1}{2}n
+\end{displaymath}
+
+\item In the back substitution, there is one long operation in the first step (computing $x_n$). Then there are successively 2, 3,\ldots, $n$ long operations. The total is 
+\begin{displaymath}
+1+2+\ldots+n=\frac{1}{2}n^2+\frac{1}{2}n
+\end{displaymath}
+
+The grand total is $n^2$.
+\end{itemize}
+\end{proof}
+\end{frame}
+
+\subsection{Diagonally Dominant Matrices}
+
+%44
+\begin{frame}
+\frametitle{Diagonally Dominant Matrices}
+The property of \textbf{diagonally dominant matrices} is expressed by the inequality $|a_{ii}|>\sum_{\begin{subarray}{l}
+{j=2}\\
+j\neq i
+\end{subarray}}^n|a_{ij}|$ \qquad $(1\leq i\leq n)$.\\
+It has the property that Gaussian elimination without pivoting can be safely used.
+\begin{theorem}[Theorem on Preserving Diagonal Dominance]
+Gaussian elimination without pivoting preserves the diagonal dominance of a matrix.
+\end{theorem}
+
+\end{frame}
+
+%45
+\begin{frame}
+\begin{proof}
+It suffices to consider the first step in Gaussian elimination, so we have to prove that for $i=2,3,...,n,$\\
+$|a_{ii}^{(2)}|>\sum_{\begin{subarray}{l}
+{j=2}\\
+j\neq i
+\end{subarray}}^n|a_{ij}^{(2)}|$ \\
+In terms of $A$, this means $|a_{ii}-(a_{i1}/a_{11})a_{1i}|>\sum_{\begin{subarray}{l}
+{j=2}\\
+j\neq i
+\end{subarray}}^n|a_{ij}-(a_{i1}/a_{11})a_{1j}|$\\
+It suffices to prove the stronger inequality $|a_{ii}|-|(a_{i1}/a_{11})a_{1i}|>\sum_{\begin{subarray}{l}
+{j=2}\\
+j\neq i
+\end{subarray}}^n\lbrace|a_{ij}|+|(a_{i1}/a_{11})a_{1j}|\rbrace$\\
+An equivalent inequality is $|a_{ii}|-\sum_{\begin{subarray}{l}
+{j=2}\\
+j\neq i
+\end{subarray}}^n|a_{ij}|>\sum_{j=2}^n|(a_{i1}/a_{11})a_{1j}|$\\
+Form the diagonal dominance in the $i$th row, we know that $|a_{ii}|-\sum_{\begin{subarray}{l}
+{j=2}\\
+j\neq i
+\end{subarray}}^n|a_{ij}|>|a_{i1}|$\\
+Hence, it suffices to prove that $|a_{i1}|\geq\sum_{j=2}^n|(a_{i1}/a_{11})a_{1j}|$\\
+This is true because of the diagonal dominance in row $1$: $|a_{11}|>\sum_{j=2}^n|a_{1j}|\Longrightarrow 1>\sum_{j=2}^n|a_{1j}/a_{11}|$
+\end{proof}
+\end{frame}
+
+%46
+\begin{frame}
+\frametitle{Diagonally Dominant Matrices}
+\newtheorem{corollary}{COROLLARY}
+\begin{corollary}[First Corollary on Diagonally Dominant Matrix]
+Every diagonally dominant matrix is nonsingular and has an LU-factorization.\\
+\end{corollary}
+
+\begin{corollary}[Second Corollary on Diagonally Dominant Matrix]
+If the scaled row pivoting version of Gaussian elimination recomputes the scale array after each major step and is applied to a diagonally dominant matrix, then the pivots will be the natural ones: $1, 2,...,n$. Hence, the work of choosing the pivots can be omitted in this case.
+\end{corollary}
+
+\end{frame}
+
+%47
+\begin{frame}
+\frametitle{Diagonally Dominant Matrices}
+\begin{proof}
+By Theorem 5, we only need to prove that the first pivot chosen in the algorithm is 1. So we should prove
+$|a_{11}|/s_{1}>|a_{i1}|/s_{i}$ \quad $(2\leq i \leq n)$.\\
+By the diagonal dominance, $|a_{ii}|=max_{j}|a_{ij}|=s_{i}$ for all $i$. \\
+Hence, $|a_{11}|/s_{1}=1$.\\
+For $i\geq2$, We have $|a_{i1}|\leq \sum_{\begin{subarray}{l}
+{j=2}\\
+j\neq i
+\end{subarray}}^n|a_{ij}|<|a_{ii}|=s_{i}$\\
+Thus, $|a_{i1}|/s_{i}<1$.
+\end{proof}
+\end{frame}
+
+\subsection{Tridiagonal System}
+
+%49
+\begin{frame}
+\frametitle{Tridiagonal System} 
+\begin{itemize}
+\item A square matrix $A=(a_{ij})$ is said to be tridiagonal if $a_{ij}=0$ for all pairs $(i,j)$ that satisfy $|i-j|>1$.
+\begin{displaymath}
+\begin{bmatrix}
+d_1 & c_1 &     &     &     &   & \\
+a_1 & d_2 & c_2 &     &     &   & \\
+    & a_2 & d_3 & c_3 &     &   & \\
+    &     & a_3 & d_4 & c_4 &   &  \\
+    &     &     & \ddots &\ddots& \ddots & \\
+    &     &     &     &a_{n-2}&   d_{n-1}     & c_{n-1}\\
+    &     &     &     &     &   a_{n-1} & d_n
+\end{bmatrix}
+\begin{bmatrix}
+x_1\\
+x_2\\
+x_3\\
+x_4\\
+\vdots\\
+x_{n-1}\\
+x_n
+\end{bmatrix}
+=\begin{bmatrix}
+b_1\\
+b_2\\
+b_3\\
+b_4\\
+\vdots\\
+b_{n-1}\\
+b_n
+\end{bmatrix}
+\end{displaymath}
+
+\end{itemize}
+\end{frame}
+
+%50
+\begin{frame}
+\frametitle{Tridiagonal System}
+\begin{itemize}
+\item Step 1 consists of these replacements:
+\begin{eqnarray*}
+d_2\leftarrow d_2-(a_1/d_1)c_1\\
+b_2\leftarrow b_2-(a_1/d_1)b_1
+\end{eqnarray*}
+
+In the back substitution phase, the first step is
+\begin{eqnarray*}
+x_n\leftarrow b_n/d_n
+\end{eqnarray*}
+
+The next step is
+\begin{eqnarray*}
+x_{n-1}\leftarrow (b_{n-1}-c_{n-1}x_n)/d_{n-1}
+\end{eqnarray*}
+\end{itemize}
+\end{frame}
+
+%51
+\begin{frame}
+\frametitle{Tridiagonal System}
+input $n,(a_i),(b_i),(c_i),(d_i)$\\
+for $i=2$ to $n$ do\\
+\quad $d_i \gets d_i-(a_{i-1}/d_{i-1})c_{i-1}$\\
+\quad $b_i \gets b_i-(a_{i-1}/d_{i-1})b_{i-1}$\\
+end do\\
+$x_n \gets b_n/d_n$\\
+for $i=n-1$ to 1 step -1 do\\
+\quad $x_i \gets (b_i-c_ix_{i+1})/d_i$\\
+end do\\
+output$(x_i)$
+\end{frame}
+
+%52
+\begin{frame}
+\frametitle{Tridiagonal System}
+\lstinputlisting{./tri.m}
+\end{frame}
+
+\end{document}
