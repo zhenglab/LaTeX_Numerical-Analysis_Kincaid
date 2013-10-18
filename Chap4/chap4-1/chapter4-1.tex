@@ -1,0 +1,884 @@
+\documentclass[notheorems,mathserif,table,compress]{beamer}  %dvipdfm选项是关键,否则编译统统通不过
+%%------------------------常用宏包------------------------
+%%注意, beamer 会默认使用下列宏包: amsthm, graphicx, hyperref, color, xcolor, 等等
+\usepackage{fontspec,xunicode,xltxtra}  % for XeTeX
+\usepackage{verbatim}
+\usepackage{mathabx}
+\usepackage{amsfonts,amssymb}
+%%------------------------ThemeColorFont------------------------
+%% Presentation Themes
+% \usetheme[<options>]{<name list>}
+\usetheme{Madrid}
+%% Inner Themes双精度计算
+% \useinnertheme[<options>]{<name>}
+%% Outer Themes
+% \useoutertheme[<options>]{<name>}
+\useoutertheme{miniframes} 
+%% Color Themes 
+%\usecolortheme[<options>]{<name list>}
+%% Font Themes
+\usefonttheme{serif}
+\setbeamertemplate{background canvas}[vertical shading][bottom=white,top=structure.fg!7] %%背景色, 上25%的蓝, 过渡到下白.
+\setbeamertemplate{theorems}[numbered]
+\setbeamertemplate{navigation symbols}{}   %% 去掉页面下方默认的导航条.
+\usepackage{zhfontcfg}
+%\setsansfont[Mapping=tex-text]{文泉驿正黑}  %% 需要fontspec宏包
+     %如果装了Adobe Acrobat,可在font.conf中配置Adobe字体的路径以使用其中文字体
+     %也可直接使用系统中的中文字体如SimSun,SimHei,微软雅黑 等
+     %原来beamer用的字体是sans family;注意Mapping的大小写,不能写错
+     %设置字体时也可以直接用字体名，以下三种方式等同：
+     %\setromanfont[BoldFont={黑体}]{宋体}
+     %\setromanfont[BoldFont={SimHei}]{SimSun}
+     %\setromanfont[BoldFont={"[simhei.ttf]"}]{"[simsun.ttc]"}
+%%------------------------MISC------------------------
+\graphicspath{{figures/}}         %% 图片路径. 本文的图片都放在这个文件夹里了.
+%%------------------------正文------------------------
+\begin{document}
+\XeTeXlinebreaklocale "zh"         % 表示用中文的断行
+\XeTeXlinebreakskip = 0pt plus 1pt % 多一点调整的空间
+%%----------------------------------------------------------
+%% This is only inserted into the PDF information catalog. Can be left
+%% out.
+%%%
+%% Delete this, if you do not want the table of contents to pop up at
+%% the beginning of each subsection:
+\AtBeginSection[]{                              % 在每个Section前都会加入的Frame
+  \frame<handout:0>{
+    \frametitle{Contents}\small
+    \tableofcontents[current,currentsubsection]
+  }
+}
+
+\AtBeginSubsection[]                            % 在每个子段落之前
+{
+  \frame<handout:0>                             % handout:0 表示只在手稿中出现
+  {
+    \frametitle{Contents}\small
+    \tableofcontents[current,currentsubsection] % 显示在目录中加亮的当前章节
+  }
+}
+
+%%----------------------------------------------------------
+\title[Numerical Analysis]{Numerical Analysis}
+\subtitle{Mathematics of Scientific Computing}
+\author[qiu]{主讲人~~~~~\textcolor{olive}{邱欣欣}\\
+    \quad 幻灯片制作~~\textcolor{olive}{邱欣欣}}
+\institute[中国海洋大学]{\small\textcolor{violet}{中国海洋大学~~信息科学与工程学院}}
+\date{2013~年~10~月~11~日}
+%\titlegraphic{\vspace{-6em}\includegraphics[height=7cm]{ouc}\vspace{-6em}}
+\frame{ \titlepage }
+%%----------------------------------------------------------
+\section*{Contents}
+\frame{\frametitle{Solving Systems of Linear Equations}\tableofcontents}
+%%----------------------------------------------------------
+\section{Introduction}
+
+%4
+\begin{frame}
+\frametitle{Introduction}
+\begin{itemize}
+\item Constructing a general-purpose algorithm for solving the problem $Ax=b$.
+\item Analyzing the errors that are associated with the computer solution and study methods for controlling and reducing the error.
+\item Introducing the important topic of iterative algorithm for this problem.
+\end{itemize}
+\end{frame}
+
+%5
+\begin{frame}
+\frametitle{Introduction}
+\begin{itemize}
+\item The overall objective of this chapter is to discuss the numerical aspects of solving systems of linear equations having the form
+\begin{equation*}
+\left\{ \begin{aligned}
+a_{11}x_1+a_{12}x_2+a_{13}x_3+\ldots+a_{1n}x_n&=b_1 \\
+a_{21}x_1+a_{22}x_2+a_{23}x_3+\ldots+a_{2n}x_n&=b_2 \\
+a_{31}x_1+a_{32}x_2+a_{33}x_3+\ldots+a_{3n}x_n&=b_3 \\
+\vdots \\
+a_{n1}x_1+a_{n2}x_2+a_{n3}x_3+\ldots+a_{nn}x_n&=b_n \\
+\end{aligned} \right.
+\end{equation*}
+
+This is a system of $n$ equations in $n$ unknowns $x_1,x_2,\ldots,x_n$. The elements $a_{ij}$ and $b_i$ are assumed to be real numbers.
+\end{itemize}
+\end{frame}
+
+%6
+\begin{frame}
+\frametitle{Introduction}
+\begin{itemize}
+\item Matrix are useful devices for representing systems of equations. The above system of linear equations can be written as
+\begin{displaymath}
+\begin{bmatrix}
+a_{11} & a_{12} & a_{13} & \ldots & a_{1n}\\
+a_{21} & a_{22} & a_{23} & \ldots & a_{2n}\\
+a_{31} & a_{32} & a_{33} & \ldots & a_{3n}\\
+\vdots & \vdots & \vdots & \ddots & \vdots \\
+a_{n1} & a_{n2} & a_{n3} & \ldots & a_{nn}\\
+\end{bmatrix}
+\begin{bmatrix}
+x_1\\
+x_2\\
+x_3\\
+\vdots\\
+x_n
+\end{bmatrix}
+=\begin{bmatrix}
+b_1\\
+b_2\\
+b_3\\
+\vdots\\
+b_n
+\end{bmatrix}
+\end{displaymath}
+
+We can denote these matrices by $A$, $x$, and $b$, so that the equation becomes simply $Ax=b$.
+\end{itemize}
+\end{frame}
+
+\section{Matrix Algebra}
+
+%8
+\begin{frame}
+\frametitle{Matrix Algebra}
+\begin{itemize}
+\item A matrix is a rectangular array of numbers such as
+\begin{displaymath}
+\left[\begin{array}{ccc}
+3.0 & 1.1 & -0.12 \\
+6.2 & 0.0 &  0.15\\
+0.6 & -4.0 & 1.3\\
+9.3 & 2.1 & 8.2 \\
+\end{array} \right]
+\left[\begin{array}{cccc}
+3 & 6 & \cfrac{11}{7} & -17 
+\end{array} \right]
+\left[\begin{array}{ccc}
+3.2\\
+-4.7\\
+0.11
+\end{array} \right]
+\end{displaymath}
+
+These are, a $4\times3$ matrix, a $1\times4$ matrix and a $3\times1$ matrix. 
+\end{itemize}
+
+\begin{itemize}
+\item A $1\times n$ matrix is called a \textsf{row vector}. A $m\times 1$ matrix is called a \textsf{column vector} or just a \textsf{vector}.
+\end{itemize}
+\begin{itemize}
+\item If $A$ is a matrix, the notations $a_{ij}$, $(A)_{ij}$, or $A(i,j)$ is used to denote the element at the intersection of the $i$th row and $j$th column. 
+\end{itemize}
+\end{frame}
+
+%9
+\begin{frame}
+\frametitle{Matrix Algebra}
+\begin{itemize}
+\item The \textsf{transpose} of a matrix is denoted by $A^{T}$ and is the matrix defined by $(A^{T})_{ij}=a_{ji}$. For example, if $A$ denotes 
+\begin{displaymath}
+\left[\begin{array}{ccc}
+3.0 & 1.1 & -0.12 \\
+6.2 & 0.0 &  0.15\\
+0.6 & -4.0 & 1.3\\
+9.3 & 2.1 & 8.2 \\
+\end{array} \right]
+\end{displaymath}
+
+we have
+\begin{displaymath}
+A^T=
+\left[\begin{array}{cccc}
+3.0 & 6.2 & 0.6 & 9.3 \\
+1.1 & 0.0 & -4.0 & 2.1\\
+-0.12 & 0.15 & 1.3 & 8.2
+\end{array} \right]
+\end{displaymath}
+
+If a matrix $A$ has the property $A^T=A$, we say that $A$ is \textsf{symmetric}.
+\end{itemize}
+\end{frame}
+
+%10
+\begin{frame}
+\frametitle{Matrix Algebra}
+\begin{itemize}
+\item If $A$ is matrix and $\lambda$ is a scalar (that is, a real number in this context), then $\lambda A$ is defined by $(\lambda A)_{ij}=\lambda a_{ij}$.
+\item If $A=(a_{ij})$ and $B=(b_{ij})$ are $m\times n$ matrices, then $A+B$ is defined by $(A+B)_{ij}=a_{ij}+b_{ij}$.
+\item If $A$ is an $m\times p$ matrix and $B$ is a $p\times n$ matrix, then $AB$ is an $m\times n$ matrix defined by  
+\begin{displaymath}
+(AB)_{ij}=\sum^{p}_{k=1}a_{ik}b_{kj} \qquad (1\leq i\leq m, 1\leq j \leq n)
+\end{displaymath}
+
+\end{itemize}
+\end{frame}
+
+%11
+\begin{frame}
+\frametitle{Matrix Algebra}
+\begin{itemize}
+\item Here are some examples of the algebraic operations:
+\begin{displaymath}
+\begin{bmatrix}
+1 & 3\\
+2 & -1\\
+4 & -4
+\end{bmatrix}
++
+\begin{bmatrix}
+6 & 0\\
+3 & -7\\
+8 & 2
+\end{bmatrix}
+=
+\begin{bmatrix}
+7 & 3\\
+5 & -8\\
+12 & -2
+\end{bmatrix}
+\end{displaymath}
+
+\begin{displaymath}
+3
+\begin{bmatrix}
+1 & 3\\
+2 & -1\\
+4 & -4
+\end{bmatrix}
+=
+\begin{bmatrix}
+3 & 9\\
+6 & -3\\
+12 & -12
+\end{bmatrix}
+\end{displaymath}
+
+\begin{displaymath}
+\begin{bmatrix}
+2 & 1 & 3\\
+1 & 5 & -6\\
+2 & 1 & 5 \\
+0 & 1 & -2
+\end{bmatrix}
+\begin{bmatrix}
+1 & 0\\
+-5 & 4\\
+0 & 3
+\end{bmatrix}
+=
+\begin{bmatrix}
+-3 & 13\\
+-24 & 2\\
+-3 & 19 \\
+-5 & -2
+\end{bmatrix}
+\end{displaymath}
+
+\end{itemize}
+\end{frame}
+
+%12
+\begin{frame}
+\frametitle{Matrix Algebra}
+\begin{itemize}
+\item In the systems of linear equations, a concept of equivalence is important.
+\item Let us consider two systems, each of them consisting of $n$ equation with $n$ unknowns expressed by
+\begin{displaymath}
+Ax=b \qquad Bx=d
+\end{displaymath}
+
+If the two systems have precisely the same solutions of equations, we call them \textsf{equivalent systems}.
+\item To solve a system of equations, we can instead solve any equivalent system; no solutions are lost and no new ones appear.
+\end{itemize}
+\end{frame}
+
+%13
+\begin{frame}
+\frametitle{Matrix Algebra} 
+These \textsf{elementary operations} are of the following three types. (Here, $\varepsilon_i$ denotes the $i$th equation in the system.)
+\begin{enumerate}
+\item Interchanging two equations in the system: $\varepsilon_i\leftrightarrow\varepsilon_j$
+\item Multiplying an equation by a nonzero number: $\lambda\varepsilon_i\rightarrow\varepsilon_i$
+\item Adding to an equation a multiple of some other equation: $\varepsilon_i+\lambda\varepsilon_j\rightarrow\varepsilon_i$
+\end{enumerate}
+
+\end{frame}
+
+%14
+\begin{frame}
+\frametitle{Theorem on Equivalent Systems}
+\theoremstyle{plain}
+\newtheorem{theorem}{THEOREM}
+\begin{theorem}[Theorem on Equivalent Systems]
+If one system of equations is obtained from another by a finite sequence of elementary operations, then the two systems are equivalent.
+\end{theorem}
+\begin{proof}
+Suppose that an elementary operation transforms the system $Ax=b$ into the system $Bx=d$.
+\begin{itemize}
+\item For the Type 1, then the two systems consist of the same equations. If $x$ solves the first system, then it solves the second, and vice versa.
+\end{itemize}
+
+\end{proof}
+\end{frame}
+
+%15
+\begin{frame}
+\frametitle{Theorem on Equivalent Systems}
+\begin{proof}
+For the Type 2, then suppose that the $i$th equation has been multiplied by a scalar $\lambda$, with $\lambda \neq 0$. The $i$th and $j$th equations in $Ax=b$ are
+\begin{eqnarray}
+a_{i1}x_1+\ldots+a_{in}x_n&=&b_i\\
+a_{j1}x_1+\ldots+a_{jn}x_n&=&b_j
+\end{eqnarray}
+
+and the $i$th equation in $Bx=d$ is
+\begin{equation}
+\lambda a_{i1}x_1+\ldots+\lambda a_{in}x_n=\lambda b_i
+\end{equation}
+
+Any vector $x$ that satisfies Equation (1) satisfies Equation (3), and vice versa, because $\lambda \neq 0$. 
+\end{proof}
+\end{frame}
+
+%16
+\begin{frame}
+\frametitle{Theorem on Equivalent Systems}
+\begin{proof}
+The $i$th and $j$th equations in $Ax=b$ are
+\begin{eqnarray}
+a_{i1}x_1+\ldots+a_{in}x_n&=&b_i\\
+a_{j1}x_1+\ldots+a_{jn}x_n&=&b_j
+\end{eqnarray}
+
+For the Type 3, assume that $\lambda$ times the $j$th equation has been added to the $i$th. Then the $i$th equation in $Bx=d$ is
+\begin{eqnarray}
+(a_{i1}+\lambda a_{j1})x_1+\ldots+(a_{in}+\lambda a_{jn})x_n=b_i+\lambda b_j
+\end{eqnarray}
+
+If $Ax=b$, then Equation (4) and (5) are true. Hence, (6) is true.\\
+If we suppose that $x$ solves $Bx=d$, then Equation (6) and (5) are true. If $\lambda$ times Equation (5) is subtracted from Equation (6), the result is Equation (4). Hence, $Ax=b$.
+\end{proof}
+\end{frame}
+
+%17
+\begin{frame}
+\frametitle{Matrix Properties}
+\begin{itemize}
+\item The $n\times n$ matrix 
+\begin{displaymath}
+I=
+\left[\begin{array}{ccccc}
+1 & 0 & 0 & \ldots & 0 \\
+0 & 1 & 0 & \ldots & 0 \\
+0 & 0 & 1 & \ldots & 0 \\
+\vdots & \vdots & \vdots & \ddots & \vdots \\
+0 & 0 & 0 & \ldots & 1 
+\end{array} \right]
+\end{displaymath}
+
+is called an \textsf{identity matrix}. It has the property that $IA=A=AI$ for any matrix $A$ of size $n\times n$. 
+\end{itemize}
+\end{frame}
+
+%18
+\begin{frame}
+\frametitle{Matrix Properties}
+\begin{itemize}
+\item If $A$ and $B$ are two matrices such that $AB=I$, then we say that $B$ is a \textsf{right inverse} of $A$ and $A$ is a \textsf{left inverse} of $B$. For example,
+
+\begin{displaymath}
+\begin{bmatrix}
+1 & 0 & 0\\
+0 & 1 & 0
+\end{bmatrix} 
+\begin{bmatrix}
+1 & 0 \\
+0 & 1\\
+\alpha & \beta
+\end{bmatrix}
+=
+\begin{bmatrix}
+1 & 0 \\
+0 & 1 
+\end{bmatrix} 
+\end{displaymath}
+
+We see that if a matrix has a right inverse, then the latter is not necessarily unique.
+\end{itemize}
+\end{frame}
+
+%19
+\begin{frame}
+\frametitle{Matrix Properties}
+\begin{theorem}[Theorem on Right Inverse]
+A square matrix can possess at most one right inverse.
+\end{theorem}
+\begin{proof}
+Let $AB=I$, where $A$, $B$, and $I$ are all $n\times n$ matrices. Denote by $A^{(j)}$ the $j$th column of $A$ and by $I^{(k)}$ the $k$th column of $I$. The equation $AB=I$ means that 
+\begin{equation}
+\sum_{j=1}^{n}b_{jk}A^{(j)}=I^{(k)} \qquad (1\leq k\leq n)
+\end{equation}
+
+Each column of $I$ is a linear combination of the columns of $A$. Since the columns of $I$ span $\mathbb{R}^n$, the same is true of the columns of $A$. Hence, the columns of $A$ form a basis for $\mathbb{R}^n$, consequently, the coefficients $b_{jk}$ in Equation (7) are uniquely determined. 
+\end{proof}
+\end{frame}
+
+%20
+\begin{frame}
+\frametitle{Matrix Properties}
+\begin{displaymath}
+\begin{bmatrix}
+a_{11} & a_{12} & \ldots & a_{1n}\\
+a_{21} & a_{22} & \ldots & a_{2n}\\
+\vdots & \vdots & \ddots & \vdots \\
+a_{n1} & a_{n2} & \ldots & a_{nn}
+\end{bmatrix}
+\begin{bmatrix}
+b_{11} & b_{12} & \ldots & b_{1n}\\
+b_{21} & b_{22} & \ldots & b_{2n}\\
+\vdots & \vdots & \ddots & \vdots \\
+b_{n1} & b_{n2} & \ldots & b_{nn}
+\end{bmatrix}
+=\begin{bmatrix}
+1 & 0 & \ldots & 0 \\
+0 & 1 & \ldots & 0 \\
+\vdots & \vdots & \ddots & \vdots \\
+0 & 0 & \ldots & 1 
+\end{bmatrix}
+\end{displaymath}
+
+\begin{displaymath}
+b_{11}\begin{bmatrix}
+a_{11}\\
+a_{21}\\
+\vdots\\
+a_{n1}
+\end{bmatrix}
++b_{21}\begin{bmatrix}
+a_{12}\\
+a_{22}\\
+\vdots\\
+a_{n2}
+\end{bmatrix}+\ldots+b_{n1}
+\begin{bmatrix}
+a_{1n}\\
+a_{2n}\\
+\vdots\\
+a_{nn}
+\end{bmatrix}=
+\begin{bmatrix}
+1\\
+0\\
+\vdots\\
+0
+\end{bmatrix}
+\end{displaymath}
+
+\begin{displaymath}
+\sum_{j=1}^{n}b_{j1}A^{(j)}=I^{(1)} \qquad (1\leq k\leq n)
+\end{displaymath}
+
+\end{frame}
+
+%21
+\begin{frame}
+\frametitle{Matrix Properties}
+\begin{theorem}[Theorem on Matrix Inverse]
+If $A$ and $B$ are square matrices such that $AB=I$, then $BA=I$.
+\end{theorem}
+\begin{proof}
+Let $C=BA-I+B$. Then
+\begin{equation*}
+AC=ABA-AI+AB=A-A+I=I
+\end{equation*}
+
+Thus, $C$ (as well as $B$) is a right inverse of $A$. By Theorem 2, $B=C$; hence, $BA=I$.  
+\end{proof}
+\end{frame}
+
+%22
+\begin{frame}
+\frametitle{Matrix Properties}
+\begin{itemize}
+\item If a square matrix $A$ has a right inverse $B$, then $B$ is unique and $BA=AB=I$. We call $B$ the \textsf{inverse} of $A$ and say that $A$ is \textsf{invertible} or \textsf{nonsingular}. We write $B=A^{-1}$ and $A=B^{-1}$.
+\item If $A$ is invertible, the system of equations $Ax=b$ has the solution $x = A^{-1}b$. 
+\end{itemize}
+\end{frame}
+
+%23
+\begin{frame}
+\frametitle{Matrix Properties}
+An \textsf{elementary matrix} is defined to be an $n\times n$ matrix that arises when an elementary operation is applied to the $n\times n$ identity matrix.
+\newline
+
+The elementary operations expressed in terms of the rows of a matrix $A$, are
+\begin{enumerate}
+\item The interchange of two rows in $A$: $A_s\leftrightarrow A_t$
+\item Multiplying one row by a nonzero constant: $\lambda A_s \rightarrow A_s$
+\item Adding to one row a multiple of another: $A_s + \lambda A_t \rightarrow A_s$
+\end{enumerate}
+
+\end{frame}
+
+%24
+\begin{frame}
+\frametitle{Matrix Properties}
+\begin{itemize}
+\item Each elementary row operation on $A$ can be accomplished by multiplying $A$ on the left by an elementary matrix.
+\end{itemize}
+\begin{eqnarray*}
+\begin{bmatrix}
+1 & 0 & 0\\
+0 & 0 & 1\\
+0 & 1 & 0
+\end{bmatrix} 
+\begin{bmatrix}
+a_{11} & a_{12} & a_{13}\\
+a_{21} & a_{22} & a_{23}\\
+a_{31} & a_{32} & a_{33}
+\end{bmatrix}
+&=&
+\begin{bmatrix}
+a_{11} & a_{12} & a_{13}\\
+a_{31} & a_{32} & a_{33}\\
+a_{21} & a_{22} & a_{23}
+\end{bmatrix} \\
+\begin{bmatrix}
+1 & 0 & 0\\
+0 & \lambda & 0\\
+0 & 0 & 1
+\end{bmatrix} 
+\begin{bmatrix}
+a_{11} & a_{12} & a_{13}\\
+a_{21} & a_{22} & a_{23}\\
+a_{31} & a_{32} & a_{33}
+\end{bmatrix}
+&=&
+\begin{bmatrix}
+a_{11} & a_{12} & a_{13}\\
+\lambda a_{21} & \lambda a_{22} & \lambda a_{23}\\
+a_{31} & a_{32} & a_{33}
+\end{bmatrix} \\
+\begin{bmatrix}
+1 & 0 & 0\\
+0 & 1 & 0\\
+0 & \lambda & 1
+\end{bmatrix} 
+\begin{bmatrix}
+a_{11} & a_{12} & a_{13}\\
+a_{21} & a_{22} & a_{23}\\
+a_{31} & a_{32} & a_{33}
+\end{bmatrix}
+&=&
+\begin{bmatrix}
+a_{11} & a_{12} & a_{13}\\
+a_{21} & a_{22} & a_{23}\\
+\lambda a_{21}+a_{31} & \lambda a_{22}+a_{32} & \lambda a_{23}+a_{33}
+\end{bmatrix} 
+\end{eqnarray*}
+
+\end{frame}
+
+%25
+\begin{frame}
+\frametitle{Matrix Properties}
+\begin{itemize}
+\item Introducing elementary matrices $E_1$, $E_2$, $\ldots$, $E_m$. If a matrix is invertible, a sequence of elementary row operations can be applied to $A$, reducing it to $I$. Thus, we have 
+\begin{displaymath}
+E_mE_{m-1}\ldots E_2E_1A=I
+\end{displaymath}
+
+From this it follows that $A^{-1}=E_mE_{m-1}\ldots E_2E_1$. 
+\item Consequently, $A^{-1}$ can be obtained by subjecting $I$ to the same sequence of elementary row operations.
+\end{itemize}
+\end{frame}
+
+%26
+\begin{frame}
+\frametitle{Matrix Properties}
+\begin{eqnarray*}
+A&=&
+\begin{bmatrix}
+1 & 2 & 3\\
+1 & 3 & 3\\
+2 & 4 & 7
+\end{bmatrix} \qquad
+\begin{bmatrix}
+1 & 0 & 0\\
+0 & 1 & 0\\
+0 & 0 & 1
+\end{bmatrix} 
+=I\\
+E_1&=&
+\begin{bmatrix}
+1 & 0 & 0\\
+-1 & 1 & 0\\
+0 & 0 & 1
+\end{bmatrix} \quad \;
+\begin{bmatrix}
+1 & 0 & 0\\
+0 & 1 & 0\\
+-2 & 0 & 1
+\end{bmatrix}
+=E_2\\
+E_1A&=&
+\begin{bmatrix}
+1 & 2 & 3\\
+0 & 1 & 0\\
+2 & 4 & 7
+\end{bmatrix} \qquad
+\begin{bmatrix}
+1 & 0 & 0\\
+-1 & 1 & 0\\
+0 & 0 & 1
+\end{bmatrix} 
+=E_1I\\
+E_2E_1A&=&
+\begin{bmatrix}
+1 & 2 & 3\\
+0 & 1 & 0\\
+0 & 0 & 1
+\end{bmatrix} \qquad
+\begin{bmatrix}
+1 & 0 & 0\\
+-1 & 1 & 0\\
+-2 & 0 & 1
+\end{bmatrix} 
+=E_2E_1I
+\end{eqnarray*}
+
+\end{frame}
+
+%27
+\begin{frame}
+\frametitle{Matrix Properties}
+\begin{eqnarray*}
+E_3&=&
+\begin{bmatrix}
+1 & -2 & 0\\
+0 & 1 & 0\\
+0 & 0 & 1
+\end{bmatrix} \quad \,
+\begin{bmatrix}
+1 & 0 & -3\\
+0 & 1 & 0\\
+0 & 0 & 1
+\end{bmatrix}
+=E_4\\
+E_3E_2E_1A&=&
+\begin{bmatrix}
+1 & 0 & 3\\
+0 & 1 & 0\\
+0 & 0 & 1
+\end{bmatrix} \qquad
+\begin{bmatrix}
+3 & -2 & 0\\
+-1 & 1 & 0\\
+-2 & 0 & 1
+\end{bmatrix} 
+=E_3E_2E_1I\\
+E_4E_3E_2E_1A&=&
+\begin{bmatrix}
+1 & 0 & 0\\
+0 & 1 & 0\\
+0 & 0 & 1
+\end{bmatrix} \qquad
+\begin{bmatrix}
+9 & -2 & -3\\
+-1 & 1 & 0\\
+-2 & 0 & 1
+\end{bmatrix} 
+=E_4E_3E_2E_1I=A^{-1}
+\end{eqnarray*}
+
+\end{frame}
+
+%28
+\begin{frame}
+\frametitle{Matrix Properties}
+\begin{theorem}[Theorem on Nonsingular Matrix Properties]
+For an $n\times n$ matrix $A$, the following properties are equivalent:
+\begin{enumerate}
+\item The inverse of $A$ exists; that is, $A$ is nonsingular.
+\item The determinant of $A$ is nonzero.
+\item The rows of $A$ form a basis for $\mathbb{R}^n$.
+\item The columns of $A$ form a basis for $\mathbb{R}^n$.
+\item As a map from $\mathbb{R}^n$ to $\mathbb{R}^n$, $A$ is injective (one to one).
+\item As a map from $\mathbb{R}^n$ to $\mathbb{R}^n$, $A$ is subjective (onto).
+\item The equation $Ax=0$ implies $x=0$.
+\item For each $b\in \mathbb{R}^n$, there is exactly one $x\in \mathbb{R}^n$ such that $Ax=b$.
+\item $A$ is a product of elementary matrices.
+\item 0 is not an eigenvalue of $A$.
+\end{enumerate}
+\end{theorem}
+
+\end{frame}
+
+%29
+\begin{frame}
+\frametitle{Matrix Properties}
+\begin{itemize}
+\item An important fundamental concept is the \textsf{positive definiteness} of a matrix. A matrix $A$ is \textsf{positive definite} if $x^TAx>0$ for every nonzero vector $x$. For example, the matrix
+\begin{displaymath}
+A=\begin{bmatrix}
+2 & 1\\
+1 & 2 
+\end{bmatrix}
+\end{displaymath}
+
+is positive definite since
+\begin{displaymath}
+x^TAx=
+\begin{bmatrix}
+x_1 & x_2\\
+\end{bmatrix}
+\begin{bmatrix}
+2 & 1\\
+1 & 2 
+\end{bmatrix}
+\begin{bmatrix}
+x_1\\
+x_2 
+\end{bmatrix}
+=(x_1+x_2)^2+x_1^2+x_2^2>0
+\end{displaymath}
+
+for all $x_1$ and $x_2$ except $x_1=x_2=0$. Here, $x^TAx$ is called a \textsf{quadratic form}.
+\end{itemize}
+\end{frame}
+
+%30
+\begin{frame}
+\frametitle{Partitioned matrices}
+\begin{itemize}
+\item It is convenient to partition matrices into submatrices and compute products as if the submatrices were numbers.
+\begin{displaymath}
+\begin{bmatrix}
+\begin{bmatrix}
+1 & 2
+\end{bmatrix} &
+\begin{bmatrix}
+1 & -1 & 0 & 1
+\end{bmatrix}\\
+\begin{bmatrix}
+-1 & 1\\
+0 & 1 \\
+1 & -1\\
+1 & 0
+\end{bmatrix}&
+\begin{bmatrix}
+1 & 0 & -1 & 1\\
+-1 & 1 & 0 & 1\\
+0 & 0 & 1 & 0\\
+1 & 2 & 1 & 0
+\end{bmatrix}
+\end{bmatrix}
+\begin{bmatrix}
+\begin{bmatrix}
+1 & 0 & 1\\
+-1 & 1 & 2
+\end{bmatrix} &
+\begin{bmatrix}
+2 & 1\\
+0 & 1
+\end{bmatrix}\\
+\begin{bmatrix}
+1 & 0 & 1\\
+-1 & 1 & 0\\
+2 & 1 & 0\\
+0 & 1 & 1
+\end{bmatrix}&
+\begin{bmatrix}
+1 & 2\\
+0 & 1 \\
+-2 & 1\\
+-1 & 1
+\end{bmatrix}
+\end{bmatrix}
+\end{displaymath}
+
+\begin{displaymath}
+=
+\begin{bmatrix}
+\begin{bmatrix}
+1 & 2 & 7
+\end{bmatrix} &
+\begin{bmatrix}
+2 & 5
+\end{bmatrix}\\
+\begin{bmatrix}
+-3 & 1 & 3\\
+-3 & 3 & 2\\
+4 & 0 & -1\\
+2 & 3 & 2
+\end{bmatrix}&
+\begin{bmatrix}
+0 & 2\\
+-2 & 1 \\
+0 & 1\\
+1 & 6
+\end{bmatrix}
+\end{bmatrix}
+\end{displaymath}
+
+\end{itemize}
+\end{frame}
+
+%31
+\begin{frame}
+\frametitle{Matrix Properties}
+\begin{itemize}
+\item If the submatrices are denoted by single letters, we have a product of the form
+\begin{displaymath}
+\begin{bmatrix}
+A_{11} & A_{12}\\
+A_{21} & A_{22} 
+\end{bmatrix}
+\begin{bmatrix}
+B_{11} & B_{12}\\
+B_{21} & B_{22} 
+\end{bmatrix}
+=
+\begin{bmatrix}
+C_{11} & C_{12}\\
+C_{21} & C_{22} 
+\end{bmatrix}
+\end{displaymath}
+
+One can verify that $C_{ij}=\sum_{s=1}^{2}A_{is}B_{sj}$. \\
+\item For example, $C_{11}=A_{11}B_{11}+A_{12}B_{21}$.
+\end{itemize}
+\end{frame}
+
+%32
+\begin{frame}
+\frametitle{Matrix Properties}
+\begin{theorem}[Theorem on Multiplication of Partitioned Matrices]
+If each product $A_{is}B_{sj}$ can be formed, and if $C_{ij}=\sum_{s=1}^nA_{is}B_{sj}$,then $C=AB$.       
+\end{theorem}
+\begin{proof}
+Let the dimensions of $A_{ij}$ be $m_i\times n_j$. Let the dimensions of $B_{ij}$ be $\widehat m_i\times \widehat n_j$. Since $A_{is}B_{sj}$ exists, we must have $n_s=\widehat m_s$ for all $s$. Then $C_{ij}$ will have dimension $m_i\times \widehat n_j$. Now select an arbitrary element $c_{ij}$ in the matrix $C$. Suppose that $c_{ij}$ lie in the block $C_{rs}$ and is in the $p$th row and $q$th column of $C_{rs}$. Then we must have 
+\begin{eqnarray*}
+i&=&m_1+m_2+\ldots+m_{r-1}+p\\
+j&=&\widehat n_1+\widehat n_2+\ldots+\widehat n_{s-1}+q
+\end{eqnarray*}
+
+\end{proof}
+\end{frame}
+
+%33
+\begin{frame}
+\frametitle{Matrix Properties}
+\begin{proof}
+Then we have  
+\begin{displaymath}
+c_{ij}=(C_{rs})_{pq}=(\sum_{t=1}^{n}A_{rt}B_{ts})_{pq}=\sum_{t=1}^{n}(A_{rs}B_{ts})_{pq}=\sum_{t=1}^{n}\sum_{\alpha=1}^{n_t}(A_{rt})_{p\alpha}(B_{ts})_{\alpha q}
+\end{displaymath}
+
+The elements $(A_{rt})_{p\alpha}$ lie in row $i$ of $A$. These elements fill out the entire row $i$ of $A$ since $1\leq t \leq n$ and $1\leq \alpha \leq n_t$. The elements $(B_{ts})_{\alpha q}$ lie in column $j$ of $B$. Also, the entire column $j$ of $B$ is present and appears in its natural order. Hence,
+\begin{displaymath}
+c_{ij}=\sum_{\beta=1}^{n}(A)_{i\beta}(B)_{\beta j}=(AB)_{ij}
+\end{displaymath}
+
+\end{proof}
+\end{frame}
+\end{document}
