@@ -1,0 +1,374 @@
+\documentclass[notheorems,mathserif,table,compress]{beamer}  %dvipdfm选项是关键,否则编译统统通不过
+%%------------------------常用宏包------------------------
+%%注意, beamer 会默认使用下列宏包: amsthm, graphicx, hyperref, color, xcolor, 等等
+\usepackage{fontspec,xunicode,xltxtra}  % for XeTeX
+\usepackage{verbatim}
+\usepackage{mathabx}
+\usepackage{iplouclistings} 
+%%------------------------ThemeColorFont------------------------
+%% Presentation Themes
+% \usetheme[<options>]{<name list>}
+\usetheme{Madrid}
+%% Inner Themes双精度计算
+% \useinnertheme[<options>]{<name>}
+%% Outer Themes
+% \useoutertheme[<options>]{<name>}
+\useoutertheme{miniframes} 
+%% Color Themes 
+% \usecolortheme[<options>]{<name list>}
+%% Font Themes
+\usefonttheme{serif}
+\setbeamertemplate{background canvas}[vertical shading][bottom=white,top=structure.fg!7] %%背景色, 上25%的蓝, 过渡到下白.
+\setbeamertemplate{theorems}[numbered]
+\setbeamertemplate{navigation symbols}{}   %% 去掉页面下方默认的导航条.
+\usepackage{zhfontcfg}
+%\setsansfont[Mapping=tex-text]{文泉驿正黑}  %% 需要fontspec宏包
+     %如果装了Adobe Acrobat,可在font.conf中配置Adobe字体的路径以使用其中文字体
+     %也可直接使用系统中的中文字体如SimSun,SimHei,微软雅黑 等
+     %原来beamer用的字体是sans family;注意Mapping的大小写,不能写错
+     %设置字体时也可以直接用字体名，以下三种方式等同：
+     %\setromanfont[BoldFont={黑体}]{宋体}
+     %\setromanfont[BoldFont={SimHei}]{SimSun}
+     %\setromanfont[BoldFont={"[simhei.ttf]"}]{"[simsun.ttc]"}
+%%------------------------MISC------------------------
+\graphicspath{{figures/}}         %% 图片路径. 本文的图片都放在这个文件夹里了.
+%%------------------------正文------------------------
+\begin{document}
+\XeTeXlinebreaklocale "zh"         % 表示用中文的断行
+\XeTeXlinebreakskip = 0pt plus 1pt % 多一点调整的空间
+%%----------------------------------------------------------
+%% This is only inserted into the PDF information catalog. Can be left
+%% out.
+%%%
+%% Delete this, if you do not want the table of contents to pop up at
+%% the beginning of each subsection:
+\AtBeginSection[]{                              % 在每个Section前都会加入的Frame
+  \frame<handout:0>{
+    \frametitle{Contents}\small
+    \tableofcontents[current,currentsubsection]
+  }
+}
+
+\AtBeginSubsection[]                            % 在每个子段落之前
+{
+  \frame<handout:0>                             % handout:0 表示只在手稿中出现
+  {
+    \frametitle{Contents}\small
+    \tableofcontents[current,currentsubsection] % 显示在目录中加亮的当前章节
+  }
+}
+
+%%----------------------------------------------------------
+\title[Numerical Analysis]{Numerical Analysis}
+\subtitle{Chapter Three: Solution of Nonlinear Equations}
+\author[zhu]{主讲人~~~~~\textcolor{olive}{朱亚菲}\\
+    \quad 幻灯片制作~~\textcolor{olive}{朱亚菲}}
+\institute[中国海洋大学]{\small\textcolor{violet}{中国海洋大学~~信息科学与工程学院}}
+\date{2013~年~10~月~27~日}
+%\titlegraphic{\vspace{-6em}\includegraphics[height=7cm]{ouc}\vspace{-6em}}
+\frame{ \titlepage }
+%%----------------------------------------------------------
+\section*{Contents}
+\frame{\frametitle{Contents}\tableofcontents}
+
+
+
+%%----------------------------------------------------------
+\section{4.4 Norms and the Analysis of Errors}
+
+
+\subsection{4.4.1 Vector Norms}
+
+
+\begin{frame}
+  \frametitle{4.4.1 Vector Norms}
+  \begin{itemize}
+  \item On a vector space $V$, a \textbf{norm} is a function $\parallel\cdot\parallel$ from $V$ to the set of nonnegtive reals that obeys these postulates:
+  \end{itemize}
+  \begin{equation}
+  \parallel x\parallel>0 \ if \ x\ne0, x\in V
+  \end{equation}
+  \begin{equation}
+  \parallel\lambda x\parallel=|\lambda|\parallel x\parallel \ if \ \lambda \in R, \ x\in V
+  \end{equation}
+  \begin{equation}
+  \parallel x+y\parallel \le \parallel x\parallel+\parallel y\parallel \ if \ x,y\in V
+  \end{equation}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{4.4.1 Vector Norms}
+  \begin{itemize}
+  \item \textbf{Euclidean} $l_2$\textbf{-norm} 
+  \[ \parallel x\parallel_2=\left(\sum_{i=1}^n x_i^2\right)^{1/2} \quad where \quad x=(x_1,x_2,\dots,x_n)^T \]
+  \item $l_\infty$\textbf{-norm}
+  \[ \parallel x\parallel_\infty=\max_{1\le i\le n} |x_i| \]
+  \item $l_1$\textbf{-norm}
+  \[ \parallel x\parallel_1=\sum_{i=1}^n |x_i| \]
+  \end{itemize}
+\end{frame}
+
+
+\subsection{4.4.2 Matrix Norms}
+
+
+\begin{frame}
+  \frametitle{4.4.2 Matrix Norms}
+  \newtheorem{theorem1}{THEOREM}
+  \begin{theorem1}[Theorem on Subordinate Matrix Norm]
+  If $\parallel\cdot\parallel$ is any norm on $R^n$, then the equation
+  \[ \parallel A\parallel=\sup_{\parallel u\parallel=1} \{\parallel Au\parallel:u\in R^n\} \]
+  defines a norm on the linear space of all $n\times n$ matrices.
+  \end{theorem1}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{4.4.2 Matrix Norms}
+  \begin{proof}
+  We shall verify the \textbf{three} axioms for a norm.\\
+  \begin{itemize}
+  \item \textbf{First}, if $A\ne0$, then $A$ has at least one nonzero column, say, $A^{(j)}\ne0$. \\
+  Consider the vector $x$ having 1 as its $j$th component and 0's elsewhere; that is , $x=(0,\ldots,0,1,0,\ldots,0)^T$.\\
+  Obviously, $x\ne0$ and the vector $v=x/\parallel x\parallel$ is of norm 1.\\
+  Hence, $\parallel A\parallel \ge \parallel Av\parallel=\cfrac{\parallel Ax\parallel}{\parallel x\parallel}=\cfrac{\parallel A^{(j)}\parallel}{\parallel x\parallel}>0$
+  \end{itemize}
+  \end{proof}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{4.4.2 Matrix Norms}
+  \begin{proof}
+  \begin{itemize}
+  \item \textbf{Next}, from Property (2) of the vector norm, we have
+  \[\parallel\lambda A\parallel=sup\{\parallel\lambda Au\parallel:\parallel u\parallel=1\}\]\\
+  $\qquad \qquad \qquad=|\lambda|sup\{\parallel Au\parallel:\parallel u\parallel=1\}=|\lambda|\parallel A\parallel$
+  \end{itemize}
+  \end{proof}
+  \begin{proof}
+  \begin{itemize}
+  \item \textbf{Finally}, for the triangle inequality\\
+  $\parallel A+B\parallel=sup\{\parallel(A+B)u\parallel:\parallel u\parallel=1\}$ \\
+  $\quad \quad \quad \quad\le sup\{\parallel Au\parallel+\parallel Bu\parallel:\parallel u\parallel=1\}$\\
+  $\quad \quad \quad \le sup\{\parallel Au\parallel:\parallel u\parallel=1\} +sup\{ \parallel Bu\parallel:\parallel u\parallel=1\}=\parallel A\parallel+\parallel B\parallel$
+  \end{itemize}
+  \end{proof}
+\end{frame}
+
+
+%如果你想书签不出现问题,请不要用\XeTeX
+ 
+                                %这类复杂的指令,直接写XeTeX吧
+\begin{frame}
+  \frametitle{4.4.2 Matrix Norms}
+  \begin{block}{$\parallel Ax\parallel \le \parallel A\parallel \parallel x\parallel \quad (x\in R^n)$}
+  \textbf{Proof} \quad \qquad
+  It is true for $x=0$.\\
+  \quad \qquad \qquad \quad If $x\ne0$, then the vector $v=x/\parallel x\parallel$ is of norm 1.\\
+  \quad \qquad \qquad \quad Hence, 
+  \[ \parallel A\parallel \ge \parallel Av\parallel=\frac{\parallel Ax\parallel}{\parallel x\parallel} \]
+  \end{block}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{4.4.2 Matrix Norms}
+  \newtheorem{theorem2}[theorem1]{THEOREM}
+  \begin{theorem2}[Theorem on Infinity Matrix Norm]
+  If the vector norm $\parallel\cdot\parallel_\infty$ is defined by
+  \[ \parallel x\parallel_\infty=\max_{1\le i\le n}|x_i| \]
+  then its subordinate matrix norm is given by
+  \[ \parallel A\parallel_\infty=\max_{1\le i\le n}\sum_{j=1}^{n} |a_{ij}| \]
+  \end{theorem2}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{4.4.2 Matrix Norms}
+  \begin{proof}
+  $Au$ is a $n\times1$ matrix. 
+  \[ \parallel A\parallel_\infty=\sup_{\parallel u\parallel_\infty=1} \parallel Au\parallel_\infty \]
+  \[ =\sup_{\parallel u\parallel_\infty=1}\Big\{ \max_{1\le i\le n} |(Au)_i|\Big\}=\max_{1 \le i\le n}\Big\{ \sup_{\parallel u\parallel_\infty=1} |(Au)_i|\Big\} \]
+  \[ =\max_{1 \le i\le n}\Big\{ \sup_{\parallel u\parallel_\infty=1} |\sum_{j=1}^{n} a_{ij}u_j|\Big\}=\max_{1\le i\le n}\sum_{j=1}^{n}|a_{ij}| \]
+  \end{proof}
+\end{frame}
+
+
+\subsection{4.4.3 Condition Number}
+
+
+\begin{frame}
+  \frametitle{4.4.3 Condition Number}
+  \begin{block}{EXAMPLE 1}
+  Consider an equation $Ax=b$, where $A$ is an $n\times n$ matrix. Suppose that $A$ is invertible. Suppose that the vector $b$ is perturbed to obtain a vector $\widetilde{b}$. If $x$ and $\widetilde{x}$ satisfy $Ax=b$ and $A\widetilde{x}=\widetilde{b}$, by how much do $x$ and $\widetilde{x}$ differ, in absolute and relative terms?
+  \end{block}
+  \begin{block}{Solution}
+  $\parallel x-\widetilde{x}\parallel=\parallel A^{-1}b-A^{-1}\widetilde{b}\parallel=\parallel A^{-1}(b-\widetilde{b})\parallel \le \parallel A^{-1}\parallel \parallel b-\widetilde{b}\parallel$\\ 
+  $\quad \quad \quad \quad=\parallel A^{-1}\parallel \parallel Ax \parallel \cfrac{\parallel b-\widetilde{b}\parallel}{\parallel b\parallel}\le \parallel A^{-1}\parallel \parallel A\parallel \parallel x\parallel \cfrac{\parallel b-\widetilde{b}\parallel}{\parallel b\parallel}$\\
+  Hence,\quad$\cfrac{\parallel x-\widetilde{x}\parallel}{\parallel x\parallel}\le \kappa(A)\cfrac{\parallel b-\widetilde{b}\parallel}{\parallel b\parallel}$
+  \quad where \quad $\kappa(A)\equiv \parallel A\parallel \cdot \parallel A^{-1}\parallel$\\
+  The number $\kappa(A)$ is called a \textbf{condition number} of the matrix $A$.
+  \end{block}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{4.4.3 Condition Number}
+  \begin{itemize}
+  \item If we solve a system of equations $Ax=b$ numerically, we obtain not the exact solution but an approximate solution $\widetilde{x}$.
+  \item One can test $\widetilde{x}$ by forming $A\widetilde{x}$ to see whether it is close to $b$.
+  \item Thus, we obtain the \textbf{residual vector} $r=b-A\widetilde{x}$
+  \item The difference between the exact solution $x$ and the approximate solution $\widetilde{x}$ is called the \textbf{error vector} $e=x-\widetilde{x}$
+  \item The following relationship $Ae=r$ between the error vector and the residual vector is of fundamental importance.
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{4.4.3 Condition Number}
+  \newtheorem{theorem3}[theorem1]{THEOREM}
+  \begin{theorem3}[Theorem on Bounds Involving Condition Number]
+  In solving systems of equations $Ax=b$, the condition number $\kappa
+(A)$, the residual vector $r$, and the error vector $e$ satisfy the following inequality:
+  \[ \frac{1}{\kappa(A)}\frac{\parallel r\parallel}{\parallel b\parallel}\le \frac{\parallel e\parallel}{\parallel x\parallel}\le \kappa(A)\frac{\parallel r\parallel}{\parallel b\parallel} \]
+  \end{theorem3}
+  \begin{proof}
+  \textbf{Since} $\parallel e\parallel\parallel b\parallel=\parallel A^{-1}r\parallel \parallel Ax\parallel \le \parallel A^{-1}\parallel \parallel r\parallel \parallel A\parallel \parallel x\parallel$ \\
+  \textbf{Thus} $\frac{\parallel e\parallel}{\parallel x\parallel}\le \kappa(A)\frac{\parallel r\parallel}{\parallel b\parallel}$\\
+  \textbf{Similarly} $\parallel r\parallel \parallel x\parallel=\parallel Ae\parallel \parallel A^{-1}b\parallel \le \parallel A\parallel \parallel e\parallel \parallel A^{-1}\parallel \parallel b\parallel$\\
+  \textbf{And thus} $\frac{1}{\kappa(A)}\frac{||r||}{||b||}\le \frac{||e||}{||x||}$
+  \end{proof}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{4.4.3 Condition Number}
+  \begin{itemize}
+  \item A matrix with a large condition number is said to be \textbf{ill conditioned}. For an illconditioned matrix $A$, there will be cases in which the solution of a system $Ax=b$ will be very sensitive to small changes in the vector $b$. 
+  \item In other words, to attain a certain precision in the determination of $x$, we shall require significantly higher precision in $b$. If the condition number of $A$ is of moderate size, the matrix is said to be \textbf{well conditioned}.
+  \end{itemize}
+\end{frame}
+
+
+\section{4.5 Neumann Series and Iterative Refinement}
+
+
+\begin{frame}
+  \frametitle{4.5 Neumann Series and Iterative Refinement}
+  \begin{block}{The concept of convergence in a vector space}
+  If a vector space $V$ is assigned a norm $\parallel \cdot\parallel$, then the pair $(V,\parallel \cdot \parallel)$ is a \textbf{normed linear space}. The notion of a convergence sequence of vectoes $v^{(1)},v^{(2)},\ldots$ is then defined as follows: We say that the given sequence $\textbf{converges}$ to a vector $v$ if 
+  \[ \lim_{k \to \infty}\parallel v^{(k)}-v\parallel=0 \]
+  \end{block}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{4.5 Neumann Series and Iterative Refinement}
+  \newtheorem{theorem}{THEOREM}
+  \begin{theorem}[Theorem on Neumann Series]
+  If $A$ is an $n\times n$ matrix such that $\parallel A\parallel<1$, then $I-A$ is invertible, and
+  \begin{equation}
+  (I-A)^{-1}=\sum_{k=0}^{\infty}A^k 
+  \end{equation}
+  \end{theorem}
+  \begin{proof}
+  \textbf{First}, we shall show that $I-A$ is invertible. If it is not invertible, then it is singular, and there exists a vector $x$ satisfying $\parallel x\parallel=1$ and $(I-A)x=0$\\
+  Then $1=\parallel x\parallel=\parallel Ax \parallel \le \parallel A\parallel \parallel x\parallel=\parallel A \parallel$\\
+  which contradicts the hypothesis that $\parallel A\parallel<1$.
+  \end{proof}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{4.5 Neumann Series and Iterative Refinement}
+  \begin{proof}
+  \textbf{Next}, we shall show that the patial sums of the Neumann series converge to $(I-A)^{-1}$:$\quad \sum_{k=0}^{m} A^k \to (I-A)^{-1} \quad(as \: m\to \infty)$\\
+  It will suffice to prove that 
+  \begin{equation}
+  (I-A)\sum_{k=0}^{m} A^k\to I \quad as \: m \to \infty
+  \end{equation}
+  The left-hand side can be written as
+  \[ (I-A)\sum_{k=0}^{m}A^k=\sum_{k=0}^{m}(A^k-A^{k+1})=A^0-A^{m+1}=I-A^{m+1} \]
+  Since $\parallel A^{m+1}\parallel \le \parallel A\parallel^{m+1}\to0$ as $m\to \infty$, this establishes (5).
+  \end{proof}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{4.5 Neumann Series and Iterative Refinement}
+  \newtheorem{theorem4}[theorem]{THEOREM}
+  \begin{theorem4}[Theorem on Invertible Matrices]
+  If $A$ and $B$ are $n\times n$ matrices that $\parallel I-AB\parallel<1$, then $A$ and $B$ are invertible. Furthermore, we have 
+  \[ A^{-1}=B\sum_{k=0}^{\infty}(I-AB)^K \quad and \quad B^{-1}=\sum_{k=0}^{\infty}(I-AB)^kA \]
+  \end{theorem4}
+  \begin{proof}
+  \[ (AB)^{-1}=\sum_{k=0}^{\infty}(I-AB)^k\]
+  \textbf{Hence}, 
+  $A^{-1}=BB^{-1}A^{-1}=B(AB)^{-1}=B\sum_{k=0}^{\infty}(I-AB)^k$\\
+  \quad \qquad$B^{-1}=B^{-1}A^{-1}A=(AB)^(-1)A=\sum_{k=0}^{\infty}(I-AB)^kA$
+  \end{proof}
+\end{frame}
+
+
+\subsection{4.5.1 Iterative Refinement}
+
+
+\begin{frame}
+  \frametitle{4.5.1 Iterative Refinement}
+  \begin{itemize}
+  \item If $x^{(0)}$ is an approximate solution of the equation $Ax=b$\\
+  then the precise solution $x$ is given by 
+  \[ x=x^{(0)}+A^{-1}(b-Ax^{(0)})=x^{(0)}+e^{(0)} \]
+  where $e^{(0)}=A^{-1}(b-Ax^{(0)})$ is called the \textbf{error vector}. \\
+  \item The \textbf{residual vector} corresponding to the approximate solution $x^{(0)}$ is $r^{(0)}=b-Ax^{(0)}$. It is computable. Of course, we do not want to compute $A^{-1}$, but the vector $e^{(0)}=A^{-1}r^{(0)}$ can be obtained by solving the equation 
+  \[ Ae^{(0)}=r^{(0)} \]
+  These remarks lead to a numerical procedure called \textbf{iterative improvement} or \textbf{iterative refinement}.
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{4.5.1 Iterative Refinement}
+  \begin{itemize}
+  \item To analyze this algorithm theoretically, we adopt the point of view that our solution $x^{(0)}$ is obtained by the formula $x^{(0)}=Bb$\\
+  \item where $B$ is an approximate inverse of $A$. The iterative process then can be written
+  \begin{equation}
+  x^{(k+1)}=x^{(k)}+B(b-Ax^{(k)}) \quad (k \ge 0)
+  \end{equation}
+  \item We interpret the loose expression ``$B$ is an approximate inverse of $A$'' to mean that $\parallel I-AB\parallel <1$. By Theorem 2, $A^{-1}$ is given by 
+  \begin{equation}
+  A^{-1}=B\sum_{k=0}^{\infty}(I-AB)^k 
+  \end{equation}
+  \item Thus, the exact solution of the equation $Ax=b$ is
+  \begin{equation}
+  x=B\sum_{k=0}^{\infty}(I-AB)^kb
+  \end{equation}
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{4.5.1 Iterative Refinement}
+  \newtheorem{theorem5}[theorem]{THEOREM}
+  \begin{theorem5}[Theorem on Iterative Improvement]
+  If $\parallel I-AB\parallel<1$, then the method of iterative improvement given by Equation(6) produces the sequence of vectors
+  \[ x^{(m)}=B\sum_{k=0}^{m}(I-AB)^kb \quad (m\ge0) \]
+  These are the partial sums in Equation(8) and therefore converge to $x$.
+  \end{theorem5}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{4.5.1 Iterative Refinement}
+  \begin{proof}
+  We use induction. Since $x^{(0)}=Bb$, the case $m=0$ is true. If the $m$th case is assumed true, then the $(m+1)st$ case is true since
+  \[ x^{(m+1)}=x^{(m)}+B(b-Ax^{(m)}) \]
+  \[ =B\sum_{k=0}^{m}(I-AB)^Kb+Bb-BAB\sum_{k=0}^{m}(I-AB)^kb \]
+  \[ =B\Big\{ b+(I-AB)\sum_{k=0}^{m}(I-AB)^kb\Big\}=B\sum_{k=0}^{m+1}(I-AB)^kb \]
+  \end{proof}
+\end{frame}
+
+
+\end{document}
