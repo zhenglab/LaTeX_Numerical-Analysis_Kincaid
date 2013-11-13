@@ -1,0 +1,584 @@
+\documentclass[notheorems,mathserif,table,compress]{beamer}  %dvipdfm选项是关键,否则编译统统通不过
+%%------------------------常用宏包------------------------
+%%注意, beamer 会默认使用下列宏包: amsthm, graphicx, hyperref, color, xcolor, 等等
+\usepackage{fontspec,xunicode,xltxtra}  % for XeTeX
+\usepackage{verbatim}
+\usepackage{mathabx}
+\usepackage{amsfonts,amssymb}
+\usepackage{iplouclistings}
+%%------------------------ThemeColorFont------------------------
+%% Presentation Themes
+% \usetheme[<options>]{<name list>}
+\usetheme{Madrid}
+%% Inner Themes双精度计算
+% \useinnertheme[<options>]{<name>}
+%% Outer Themes
+% \useoutertheme[<options>]{<name>}
+\useoutertheme{miniframes} 
+%% Color Themes 
+%\usecolortheme[<options>]{<name list>}
+%% Font Themes
+\usefonttheme{serif}
+\setbeamertemplate{background canvas}[vertical shading][bottom=white,top=structure.fg!7] %%背景色, 上25%的蓝, 过渡到下白.
+\setbeamertemplate{theorems}[numbered]
+\setbeamertemplate{navigation symbols}{}   %% 去掉页面下方默认的导航条.
+\usepackage{zhfontcfg}
+%\setsansfont[Mapping=tex-text]{文泉驿正黑}  %% 需要fontspec宏包
+     %如果装了Adobe Acrobat,可在font.conf中配置Adobe字体的路径以使用其中文字体
+     %也可直接使用系统中的中文字体如SimSun,SimHei,微软雅黑 等
+     %原来beamer用的字体是sans family;注意Mapping的大小写,不能写错
+     %设置字体时也可以直接用字体名，以下三种方式等同：
+     %\setromanfont[BoldFont={黑体}]{宋体}
+     %\setromanfont[BoldFont={SimHei}]{SimSun}
+     %\setromanfont[BoldFont={"[simhei.ttf]"}]{"[simsun.ttc]"}
+%%------------------------MISC------------------------
+\graphicspath{{figures/}}         %% 图片路径. 本文的图片都放在这个文件夹里了.
+%%------------------------正文------------------------
+\begin{document}
+\XeTeXlinebreaklocale "zh"         % 表示用中文的断行
+\XeTeXlinebreakskip = 0pt plus 1pt % 多一点调整的空间
+%%----------------------------------------------------------
+%% This is only inserted into the PDF information catalog. Can be left
+%% out.
+%%%
+%% Delete this, if you do not want the table of contents to pop up at
+%% the beginning of each subsection:
+\AtBeginSection[]{                              % 在每个Section前都会加入的Frame
+  \frame<handout:0>{
+    \frametitle{Contents}\small
+    \tableofcontents[current,currentsubsection]
+  }
+}
+
+\AtBeginSubsection[]                            % 在每个子段落之前
+{
+  \frame<handout:0>                             % handout:0 表示只在手稿中出现
+  {
+    \frametitle{Contents}\small
+    \tableofcontents[current,currentsubsection] % 显示在目录中加亮的当前章节
+  }
+}
+
+%%----------------------------------------------------------
+\title[Numerical Analysis]{Numerical Analysis}
+\subtitle{Mathematics of Scientific Computing}
+\author[qiu]{主讲人~~~~~\textcolor{olive}{邱欣欣}\\
+    \quad 幻灯片制作~~\textcolor{olive}{邱欣欣}}
+\institute[中国海洋大学]{\small\textcolor{violet}{中国海洋大学~~信息科学与工程学院}}
+\date{2013~年~11~月~10~日}
+%\titlegraphic{\vspace{-6em}\includegraphics[height=7cm]{ouc}\vspace{-6em}}
+\frame{ \titlepage }
+%%----------------------------------------------------------
+\section*{Contents}
+\frame{\frametitle{Solving Systems of Linear Equations}\tableofcontents}
+%%----------------------------------------------------------
+\section{Steepest Descent and Conjugate Gradient Methods}
+
+%
+\begin{frame}
+\frametitle{Introduction}
+Solving the system
+\begin{displaymath}
+Ax=b
+\end{displaymath}
+
+for the case when $A$ is a real $n\times n$, \textsf{symmetric}, and \textsf{positive definite matrix}. These means that 
+\begin{displaymath}
+A^T=A
+\end{displaymath}
+
+And 
+\begin{displaymath}
+x^TAx>0 \quad \textrm{for}\quad x\neq 0
+\end{displaymath}
+\end{frame}
+
+%
+\begin{frame}
+\frametitle{Lemma on Quadratic Form}
+\newtheorem{lemma}{LEMMA}
+\begin{lemma}[Lemma on Quadratic Form]
+If $A$ is symmetric and positive definite, then the problem of solving $Ax=b$ is equivalent to the problem of minimizing the quadratic form
+\begin{displaymath}
+q(x)=\langle x,Ax \rangle-2\langle x,b \rangle
+\end{displaymath}
+
+\end{lemma}
+
+\begin{itemize}
+\item Soving $Ax=b$ $\Longrightarrow$ the minimum of quadratic functional $\Longrightarrow$ $x^{(k+1)}=x^{(k)}+t_kv^{(k)}$
+\end{itemize}
+
+\end{frame}
+
+%
+\begin{frame}
+\frametitle{Introduction}
+\begin{proof}
+\begin{eqnarray*}
+q(x)&=&\langle x,Ax \rangle-2\langle x,b \rangle\\
+    &=&x^TAx-2b^Tx
+\end{eqnarray*}
+
+Computing the derivative
+\begin{displaymath}
+\frac{\partial q}{\partial x_i}=2(a_{i1}x_1+\ldots+a_{in}x_n)-2b_i \qquad i=1,2,\ldots,n
+\end{displaymath}
+
+\begin{displaymath}
+\textrm{grad } q(x)=2(Ax-b)=-2r \qquad r=b-Ax
+\end{displaymath}
+
+\end{proof}
+\end{frame}
+
+
+%
+\begin{frame}
+\frametitle{Introduction}
+\begin{displaymath}
+\textrm{grad } q(x)=2(Ax-b)=-2r \qquad r=b-Ax
+\end{displaymath}
+
+\begin{itemize}
+\item If $q(x)$ reaches its minimum at $x^*$, then grad $q(x)=0$, so $Ax^*=b$ and $x^*$ is the solution of system.
+\item If $x^*$ is a solution of the system $Ax=b$, for any vector $y$
+\begin{eqnarray*}
+q(x^*+y)&=&(x^*+y)^TA(x^*+y)-2b^T(x^*+y)\\
+&=&{x^*}^TAx^*-2b^Tx^*+y^TAy=q(x^*)+y^TAy
+\end{eqnarray*}
+
+When $A$ is positive definite matrix, $y^TAy\geq0$, so $q(x^*+y)\geq q(x^*)$, $x^*$ is a minimum point of $q$.  
+\end{itemize}
+\end{frame}
+
+%
+\begin{frame}
+\frametitle{Introduction}
+\begin{itemize}
+\item 
+\begin{eqnarray*}
+x&=&x^0+tv^0\\
+x^1&=&x^0+t_0v^0\\
+q(x^0+t_0v^0)&\leq& q(x^0+tv^0)
+\end{eqnarray*}
+
+\begin{eqnarray*}
+x&=&x^k+tv^k\\
+q(x^k+t_kv^k)&\leq& q(x^k+tv^k)\\
+x^{k+1}&=&x^{k}+t_kv^k
+\end{eqnarray*}
+
+\end{itemize}
+\end{frame}
+
+%
+\begin{frame}
+\frametitle{Introduction}
+\begin{itemize}
+\item Now we should compute $t$.
+\begin{eqnarray*}
+q(x+tv)&=&\langle x+tv,A(x+tv) \rangle-2\langle x+tv,b \rangle\\
+       &=&q(x)+2t\langle v,Ax-b \rangle+t^2\langle v,Av \rangle    
+\end{eqnarray*}
+
+Computing the derivative 
+\begin{displaymath}
+\frac{d}{dt}q(x+tv)=2\langle v,Ax-b \rangle+2t\langle v,Av\rangle
+\end{displaymath}
+
+So the value of $t$ that yields the minimum point is
+\begin{displaymath}
+\hat{t}=\langle v,b-Ax \rangle/\langle v,Av \rangle
+\end{displaymath}
+
+\end{itemize}
+\end{frame}
+
+%
+\begin{frame}
+\frametitle{Introduction}
+\begin{itemize}
+\item Then we obtained the general form of iterative methods
+\begin{displaymath}
+x^{(k+1)}=x^{(k)}+t_kv^{(k)}
+\end{displaymath}
+
+where
+\begin{displaymath}
+t_k=\frac{\langle v^{(k)},b-Ax^{(k)} \rangle}{\langle v^{(k)},Av^{(k)} \rangle}
+\end{displaymath}
+
+\begin{displaymath}
+r^{(k)}=b-Ax^{(k)}
+\end{displaymath}
+\end{itemize}
+\end{frame}
+
+\subsection{Steepest Descent}
+%
+\begin{frame}
+\frametitle{Steepest Descent}
+\begin{itemize}
+\item In the method of steepest descent, $v^{(k)}$ should be the negative gradient of $q$ at $x^{(k)}$. And the negative gradient points in the direction of the residual, $r^{(k)}=b-Ax^{(k)}$.
+\item 
+input $x,A,b,M$\\
+output $0,x$\\
+for $k=1$ to $M$ do\\
+\qquad$v\leftarrow b-Ax$\\
+\qquad$t\leftarrow \langle v,v \rangle/\langle v,Av \rangle$\\
+\qquad$x\leftarrow x+tv$\\
+\qquad output $k,x$\\
+end do
+
+\end{itemize}
+\end{frame}
+
+%
+\begin{frame} 
+\frametitle{Steepest Descent}
+\lstinputlisting{./SteepestDescent.m}
+\end{frame}
+
+\subsection{Conjugate Gradient Method}
+
+%
+\begin{frame}
+\frametitle{Conjugate Gradient Method} 
+\begin{itemize}
+\item Given initial vector $x^0$, at step 1 we choose the negative gradient of $q$ at $x^0$ as the $v^0$, and $v^0=r^0$.
+\item At ${k+1}$th $(k\geq 1)$ step, we choose $v_k$ from two-dimensional plane formed by $r_k$ and $v_{k-1}$
+\begin{displaymath}
+\pi_2=\{x=x_k+\xi r_k+\eta v_{k-1}:\xi,\eta \in \mathbb{R}\}
+\end{displaymath} 
+
+Considering the limitation on plane $\pi_2$ 
+\begin{eqnarray*}
+\psi(\xi,\eta)&=&q(x_k+\xi r_k+\eta v_{k-1})\\
+&=&(x_k+\xi r_k+\eta v_{k-1})^TA(x_k+\xi r_k+\eta v_{k-1})\\
+& &-2b^T(x_k+\xi r_k+\eta v_{k-1})
+\end{eqnarray*}
+
+\end{itemize}
+\end{frame}
+
+%
+\begin{frame}
+\frametitle{Conjugate Gradient Method} 
+\begin{itemize}
+\item Let $\cfrac{\partial\psi}{\partial\xi}=\cfrac{\partial\psi}{\partial \eta}=0$. Then $q$ has a unique minimum point in $\pi_2$
+\begin{displaymath}
+\tilde{x}=x_k+\xi_0 r_k+\eta_0 v_{k-1}
+\end{displaymath} 
+
+The $\xi_0$ and $\eta_0$ satisfy
+\begin{displaymath}
+\left\{\begin{array}{ll}
+\xi_0r_k^TAr_k+\eta_0 r_k^TAv_{k-1}=r_k^Tr_k\\
+\xi_0r_k^TAv_{k-1}+\eta_0 v_{k-1}^TAv_{k-1}=0 \end{array} \right.
+\end{displaymath}
+
+we can select $v_k=\cfrac{1}{\xi_0}(\tilde{x}-x_k)=r_k+\cfrac{\eta_0}{\xi_0}v_{k-1}$ as the new search direction.\\
+Let $s_{k-1}=\cfrac{\eta_0}{\xi_0}=-\cfrac{r_k^TAv_{k-1}}{v_{k-1}^TAv_{k-1}}$
+\end{itemize}
+\end{frame}
+
+%
+\begin{frame}
+\frametitle{Conjugate Gradient Method} 
+\begin{itemize}
+\item Notice that $v_k$ satisfy $v_k^TAv_{k-1}=0$, it means $v_k$ and $v_{k-1}$ mutually conjugate.
+\item 
+\begin{eqnarray*}
+t_k&=&\cfrac{r_k^Tv_k}{v_k^TAv_k}=\cfrac{r_k^Tr_k}{v_k^TAv_k}\\
+s_k&=&-\cfrac{r_{k+1}^TAv_k}{v_k^TAv_k}=\cfrac{r_{k+1}^Tr_{k+1}}{r_k^Tr_k}
+\end{eqnarray*}
+\begin{eqnarray*}
+x_{k+1}&=&x_k+t_kv_k\\
+r_{k+1}&=&b-Ax_{k+1}=r_k-t_kAv_k\\
+v_{k+1}&=&r_{k+1}+s_kv_k
+\end{eqnarray*}
+
+We will use $r_k^Tr_{k+1}=r_k^Tv_{k-1}=r_{k+1}^Tv_k=0$, $k=1,2,\ldots$.
+\end{itemize}
+\end{frame}
+
+%
+\begin{frame}
+\frametitle{Conjugate Gradient Method} 
+\begin{itemize}
+\item
+input $x^{(0)},M,A,b,\varepsilon$\\
+$r^{(0)}\leftarrow b-Ax^{(0)}$\\
+$v^{(0)}\leftarrow r^{(0)}$\\
+output $0,x^{(0)},r^{(0)}$\\
+for $k=0$ to $M-1$ do\\
+\qquad if $v^{(k)}=0$ then stop\\
+\qquad $t_k\leftarrow \langle r^{(k)},r^{(k)}\rangle/\langle v^{(k)},Av^{(k)}\rangle$\\
+\qquad $x^{(k+1)}\leftarrow x^{(k)}+t_kv^{(k)}$\\
+\qquad $r^{(k+1)}\leftarrow r^{(k)}-t_kAv{(k)}$\\
+\qquad if $\parallel r^{(k+1)}\parallel_2^2<\varepsilon$ then stop\\
+\qquad $s_k\leftarrow \langle r^{(k+1)},r^{(k+1)}\rangle/\langle r^{(k)},r^{(k)}\rangle$\\
+\qquad $v^{(k+1)}\leftarrow r^{(k+1)}+s_kv^{(k)}$\\
+\qquad output $k+1,x^{(k+1)},r^{(k+1)}$\\
+end do
+\end{itemize}
+\end{frame}
+
+%
+\begin{frame}
+%\frametitle{Preconditioned Conjugate Gradient}
+\begin{itemize}
+\item 
+input $x,A,b,M,Q,\delta,\varepsilon$\\
+$r\leftarrow b-Ax$\\
+$v\leftarrow r$\\
+$c\leftarrow \langle r,r\rangle$\\
+for $k=1$ to $M$ do\\
+\qquad if $\langle v,v\rangle^{1/2}<\delta$ then exit loop\\
+\qquad$z\leftarrow Av$\\
+\qquad$t\leftarrow c/\langle v,z\rangle$\\
+\qquad$x\leftarrow x+tv$\\
+\qquad$r\leftarrow r-tz$\\
+\qquad$d\leftarrow \langle r,r\rangle$\\
+\qquad if $d<\varepsilon$ then exit loop\\
+\qquad$v\leftarrow r+(d/c)v$\\
+\qquad$c\leftarrow d$\\
+\qquad output $k,x,r$\\
+end do
+\end{itemize}
+\end{frame}
+
+%
+\begin{frame}
+%\frametitle{Conjugate Gradient Method} 
+\lstinputlisting{./ConGradient.m}
+\end{frame}
+
+%
+\begin{frame}
+\frametitle{Conjugate Gradient Method} 
+\begin{itemize}
+\item The \textsf{conjugate gradient} method, the search directions $v^{(i)}$ form an $A$-orthogonal system, that is, $\langle v^{(i)}, Av^{(j)}\rangle=0$ if $i\neq j$.
+\item The property is that the residuals, $r^{(i)}=b-Ax^{(i)}$, form an orthogonal system, that is, $\langle r^{(i)}, r^{(j)}\rangle=0$ if $i\neq j$.
+\item Theoretically, the conjugate gradient algorithm will yield the solution of system $Ax=b$ in at most $n$ steps.
+
+\end{itemize}
+\end{frame}
+
+
+
+%
+\begin{frame}
+\frametitle{Conjugate Gradient Method} 
+\newtheorem{theorem}{THEOREM}
+\begin{theorem}[Theorem on Conjugate Gradient Algorithm]
+In the conjugate gradient algorithm, for any integer $m<n$, if $v^{(0)}, v^{(1)},\ldots,v^{(m)}$ are all nonzero vectors, then $r^{(i)}=b-Ax^{(i)}$ for $0\leq i\leq m$, and $\{r^{(0)}, r^{(1)},\ldots,r^{(m)}\}$ is an orthogonal set of nonzero vectors.
+\end{theorem}
+
+\begin{proof}
+\begin{enumerate}
+\item $\langle r^{(m)},v^{(i)}\rangle=0 \qquad (0\leq i<m)$
+\item $\langle r^{(i)},r^{(i)}\rangle=\langle r^{(i)},v^{(i)}\rangle \qquad (0\leq i\leq m)$
+\item $\langle v^{(m)},Av^{(i)}\rangle=0 \qquad (0\leq i<m)$
+\item $r^{(i)}=b-Ax^{(i)} \qquad (0\leq i\leq m)$
+\item $\langle r^{(m)},r^{(i)}\rangle=0 \qquad (0\leq i<m)$
+\item $r^{(i)}\neq 0 \qquad (0\leq i\leq m)$
+\end{enumerate}
+
+\end{proof}
+\end{frame}
+
+%
+\begin{frame}
+%\frametitle{Conjugate Gradient Method}
+\begin{proof}
+The proof is by induction on $m$.\\
+For the case $m=0$, we assume that $v^{(0)}\neq 0$, then $r^{(0)}=b-Ax^{(0)}$\\$=v^{(0)}\neq 0$.\\
+Assume that the theorem is true for $m$, we shall prove it for $m+1$.\\
+1. $\langle r^{(m+1)},v^{(i)}\rangle=0 \qquad (0\leq i\leq m)$.\\
+Let $i=m$,
+\begin{eqnarray*}
+\langle r^{(m+1)},v^{(m)}\rangle&=&\langle r^{(m)}-t_mAv^{(m)},v^{(m)}\rangle\\
+                                &=&\langle r^{(m)},v^{(m)}\rangle-t_m\langle v^{(m)},Av^{(m)}\rangle\\
+                                &=&\langle r^{(m)},v^{(m)}\rangle-\langle r^{(m)},r^{(m)}\rangle=0
+\end{eqnarray*}
+
+If $0\leq i<m$,
+\begin{eqnarray*}
+\langle r^{(m+1)},v^{(i)}\rangle&=&\langle r^{(m)},v^{(i)}\rangle-t_m\langle v^{(m)},Av^{(i)}\rangle=0                              
+\end{eqnarray*}
+\end{proof}
+
+\end{frame}
+
+%
+\begin{frame}
+\frametitle{Conjugate Gradient Method}
+\begin{proof}
+2. $\langle r^{(m+1)},r^{(m+1)}\rangle=\langle r^{(m+1)},v^{(m+1)}\rangle$.
+\begin{eqnarray*}
+\langle r^{(m+1)},v^{(m+1)}\rangle=\langle r^{(m+1)},r^{(m+1)}+s_mv^{(m)}\rangle=\langle r^{(m+1)},r^{(m+1)}\rangle                             
+\end{eqnarray*}
+
+\end{proof}
+\end{frame}
+
+\subsection{Preconditioned Conjugate Gradient}
+
+%
+\begin{frame}
+\frametitle{Preconditioned Conjugate Gradient}
+\begin{itemize}
+\item For $Ax=b$, preconditioning this system and obtain a new system that is better conditioned. So for some nonsingular matrix $S$, the preconditioned system
+\begin{displaymath}
+\widehat{A}\hat{x}=\hat{b}
+\end{displaymath}
+
+where
+\begin{displaymath}
+\left\{\begin{array}{l}
+\widehat{A}=S^TAS\\
+\hat{x}=S^{-1}x\\
+\hat{b}=S^Tb
+\end{array} \right.
+\end{displaymath} 
+ 
+\item Suppose that the symmetric and positive definite splitting matrix $Q$ can be factored so that 
+\begin{displaymath}
+Q^{-1}=SS^T
+\end{displaymath}
+
+\end{itemize}
+\end{frame}
+
+%
+\begin{frame}
+\frametitle{Preconditioned Conjugate Gradient}
+\begin{itemize}
+\item We write
+\begin{eqnarray*}
+\hat{x}^{(k)}&=&S^{-1}x^{(k)}\\
+\hat{v}^{(k)}&=&S^{-1}v^{(k)}\\
+\hat{r}^{(k)}&=&\hat{b}-\widehat{A}\hat{x}^{(k)}=S^Tb-(S^TAS)S^{-1}x^{(k)}=S^Tr^{(k)}\\
+\tilde{r}^{(k)}&=&Q^{-1}r^{(k)}                     
+\end{eqnarray*}
+
+Then, we obtain
+\begin{eqnarray*}
+\hat{t_k}&=&\langle \hat{r}^{(k)},\hat{r}^{(k)}\rangle/\langle \hat{v}^{(k)},\widehat{A}\hat{v}^{(k)}\rangle=\langle \tilde{r}^{(k)},r^{(k)}\rangle/\langle v^{(k)},Av^{(k)}\rangle\\
+x^{(k+1)}&=&x^{(k)}+\hat{t_k}v^{(k)}\\
+r^{(k+1)}&=&r^{(k)}-\hat{t_k}Av^{(k)}\\
+\hat{s_k}&=&\langle \hat{r}^{(k+1)},\hat{r}^{(k+1)}\rangle/\langle \hat{r}^{(k)},\hat{r}^{(k)}\rangle=\langle \tilde{r}^{(k+1)},r^{(k+1)}\rangle/\langle \tilde{r}^{(k)},r^{(k)}\rangle\\
+v^{(k+1)}&=&\tilde{r}^{(k+1)}+\hat{s_k}v^{(k)}
+\end{eqnarray*}
+
+\end{itemize}
+\end{frame}
+
+%
+\begin{frame}
+%\frametitle{Preconditioned Conjugate Gradient}
+\begin{itemize}
+\item 
+input $x,A,b,M,Q,\delta,\varepsilon$\\
+$r\leftarrow b-Ax$\\
+solve $Qz=r$ for $z$\\
+$v\leftarrow z$ ;
+$c\leftarrow \langle z,r\rangle$\\
+for $k=1$ to $M$ do\\
+\qquad if $\langle v,v\rangle^{1/2}<\delta$ then exit loop\\
+\qquad$z\leftarrow Av$ ;
+$t\leftarrow c/\langle v,z\rangle$\\
+\qquad$x\leftarrow x+tv$ ;
+$r\leftarrow r-tz$\\
+\qquad solve $Qz=r$ for $z$\\
+\qquad$d\leftarrow \langle z,r\rangle$\\
+\qquad if $d<\varepsilon$ then\\
+\qquad \qquad if $\langle r,r\rangle<\varepsilon$ then exit loop\\
+\qquad end if\\ 
+\qquad$v\leftarrow z+(d/c)v$\\
+\qquad$c\leftarrow d$\\
+\qquad output $k,x,r$\\
+end do
+\end{itemize}
+\end{frame}
+
+%
+\begin{frame}
+\frametitle{Preconditioned Conjugate Gradient}
+\lstinputlisting{./PCG1.m}
+\end{frame}
+
+%
+\begin{frame}
+\frametitle{Preconditioned Conjugate Gradient}
+\lstinputlisting{./PCG2.m}
+\end{frame}
+
+\section{Roundoff Error in the Gaussian Algorithm}
+
+%
+\begin{frame}
+\frametitle{Analysis of Roundoff Error in the Gaussian Algorithm}
+\begin{theorem}[Theorem on $\tilde{L}\tilde{U}$-Factorization]
+Let $A$ be an $n\times n$ nonsingular matrix whose elements are machine numbers in a computer with unit roundoff $\varepsilon$. The Gaussian algorithm with row pivoting produces matrices $\tilde{L}$ and $\tilde{U}$ such that 
+\begin{displaymath}
+\tilde{L}\tilde{U}=A+E \quad where \quad |e_{ij}|\leq 2n\varepsilon \max_{1\leq i,j,k\leq n}|a_{ij}^{(k)}|
+\end{displaymath}
+
+\end{theorem}
+\end{frame}
+
+%
+\begin{frame}
+\frametitle{Analysis of Roundoff Error in the Gaussian Algorithm}
+\begin{theorem}[Theorem on Roundoff Error in Dot Product]
+If $x_1,x_2,\ldots,x_n$ and $y_1,y_2,\ldots,y_n$ are machine numbers, then the machine value of 
+\begin{displaymath}
+\sum_{i=1}^nx_iy_i
+\end{displaymath}
+computed in the natural way can be expressed as $\sum_{i=1}^nx_iy_i(1+\delta _i)$, in which the $\delta_i$'s satisfy $|\delta_i|\leq\cfrac{6}{5}(n+1)\varepsilon$. (The number $\varepsilon$ is the unit roundoff error of the machine, and we assume that $n\varepsilon<\cfrac{1}{3}$.)
+\end{theorem}
+\end{frame}
+
+%
+\begin{frame}
+\frametitle{Analysis of Roundoff Error in the Gaussian Algorithm}
+\begin{theorem}[Theorem on Perturbed Unit Lower Triangular System]
+Let $L$ be an $n\times n$ unit lower triangular matrix whose elements are machine numbers. Let $b$ be a vector whose components are machine numbers. The computed solution of $Ly=b$ is a vector $\tilde{y}$ that is the exact solution of
+\begin{displaymath}
+(L+\Delta)\tilde{y}=b \quad with \quad |\Delta_{ij}|\leq\frac{6}{5}(n+1)\varepsilon|l_{ij}|
+\end{displaymath}
+
+Here $\varepsilon$ is the machine's unit roundoff error, and it is assumed that $n\varepsilon<\cfrac{1}{3}$.
+\end{theorem}
+\end{frame}
+
+%
+\begin{frame}
+\frametitle{Analysis of Roundoff Error in the Gaussian Algorithm}
+\begin{theorem}[Theorem on Perturbed Upper Triangular System]
+Let $U$ be an $n\times n$, upper triangular, nonsingular matrix. If the elements of $U$ and $c$ are machine numbers, and if $n\varepsilon<\frac{1}{3}$, then the computed solution $\tilde{y}$ of $Uy=c$ satisfies exactly a perturbed system
+\begin{displaymath}
+(U+\Delta)\tilde{y}=c \quad with \quad |\Delta_{ij}|\leq\frac{6}{5}(n+1)\varepsilon|u_{ij}|
+\end{displaymath}
+
+\end{theorem}
+\end{frame}
+
+%
+\begin{frame}
+\frametitle{Analysis of Roundoff Error in the Gaussian Algorithm}
+\begin{theorem}[Theorem on Perturbed System]
+Let the elements of $A$ and b be machine numbers. If the Gaussian algorithm with row pivoting is used to solve $Ax=b$, then the computed solution $\tilde{x}$ is the exact solution of a perturbed system 
+\begin{displaymath}
+(A+F)\tilde{x}=b \quad in\; which \quad |f_{ij}|\leq10n^2\varepsilon\rho
+\end{displaymath}
+
+Here $n$ is the order of the matrix $A$, $\rho=\max_{1\leq i,j,k\leq n}|a_{ij}^{(k)}|$, and $\varepsilon$ is the machine's unit roundoff error. It is assumed that $n\varepsilon<\cfrac{1}{3}$.
+\end{theorem}
+\end{frame}
+
+
+\end{document}
