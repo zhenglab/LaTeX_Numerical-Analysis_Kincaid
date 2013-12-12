@@ -1,0 +1,477 @@
+\documentclass[notheorems,mathserif,table,compress]{beamer}  %dvipdfm选项是关键,否则编译统统通不过
+%%------------------------常用宏包------------------------
+%%注意, beamer 会默认使用下列宏包: amsthm, graphicx, hyperref, color, xcolor, 等等
+\usepackage{fontspec,xunicode,xltxtra}  % for XeTeX
+\usepackage{verbatim}
+\usepackage{mathabx}
+\usepackage{iplouclistings} 
+%%------------------------ThemeColorFont------------------------
+%% Presentation Themes
+% \usetheme[<options>]{<name list>}
+\usetheme{Madrid}
+%% Inner Themes双精度计算
+% \useinnertheme[<options>]{<name>}
+%% Outer Themes
+% \useoutertheme[<options>]{<name>}
+\useoutertheme{miniframes} 
+%% Color Themes 
+% \usecolortheme[<options>]{<name list>}
+%% Font Themes
+\usefonttheme{serif}
+\setbeamertemplate{background canvas}[vertical shading][bottom=white,top=structure.fg!7] %%背景色, 上25%的蓝, 过渡到下白.
+\setbeamertemplate{theorems}[numbered]
+\setbeamertemplate{navigation symbols}{}   %% 去掉页面下方默认的导航条.
+\usepackage{zhfontcfg}
+%\setsansfont[Mapping=tex-text]{文泉驿正黑}  %% 需要fontspec宏包
+     %如果装了Adobe Acrobat,可在font.conf中配置Adobe字体的路径以使用其中文字体
+     %也可直接使用系统中的中文字体如SimSun,SimHei,微软雅黑 等
+     %原来beamer用的字体是sans family;注意Mapping的大小写,不能写错
+     %设置字体时也可以直接用字体名，以下三种方式等同：
+     %\setromanfont[BoldFont={黑体}]{宋体}
+     %\setromanfont[BoldFont={SimHei}]{SimSun}
+     %\setromanfont[BoldFont={"[simhei.ttf]"}]{"[simsun.ttc]"}
+%%------------------------MISC------------------------
+\graphicspath{{figures/}}         %% 图片路径. 本文的图片都放在这个文件夹里了.
+%%------------------------正文------------------------
+\begin{document}
+\XeTeXlinebreaklocale "zh"         % 表示用中文的断行
+\XeTeXlinebreakskip = 0pt plus 1pt % 多一点调整的空间
+%%----------------------------------------------------------
+%% This is only inserted into the PDF information catalog. Can be left
+%% out.
+%%%
+%% Delete this, if you do not want the table of contents to pop up at
+%% the beginning of each subsection:
+\AtBeginSection[]{                              % 在每个Section前都会加入的Frame
+  \frame<handout:0>{
+    \frametitle{Contents}\small
+    \tableofcontents[current,currentsubsection]
+  }
+}
+
+\AtBeginSubsection[]                            % 在每个子段落之前
+{
+  \frame<handout:0>                             % handout:0 表示只在手稿中出现
+  {
+    \frametitle{Contents}\small
+    \tableofcontents[current,currentsubsection] % 显示在目录中加亮的当前章节
+  }
+}
+
+%%----------------------------------------------------------
+\title[Numerical Analysis]{Numerical Analysis}
+\subtitle{Chapter Six: Approximating Functions}
+\author[zhu]{主讲人~~~~~\textcolor{olive}{朱亚菲}\\
+    \quad 幻灯片制作~~\textcolor{olive}{朱亚菲}}
+\institute[中国海洋大学]{\small\textcolor{violet}{中国海洋大学~~信息科学与工程学院}}
+\date{2013~年~12~月~6~日}
+%\titlegraphic{\vspace{-6em}\includegraphics[height=7cm]{ouc}\vspace{-6em}}
+\frame{ \titlepage }
+%%----------------------------------------------------------
+\section*{Contents}
+\frame{\frametitle{Contents}\tableofcontents}
+
+
+
+%%----------------------------------------------------------
+\section{Polynomial Interpolation}
+
+\subsection{Introduction}
+
+
+\begin{frame}
+  \frametitle{Introduction}
+  \begin{enumerate}
+  \item Find simple approximate representations for known functions.
+  \item Interpolation and extrapolation, estimating unknown function values from known values at nearby points.
+  \end{enumerate}
+  \begin{displaymath}
+  \begin{tabular}{r|| r| r| r| c| c}
+  x & $x_0$ & $x_1$ & $x_2$ & \ldots & $x_n$\\
+  \hline
+  y & $y_0$ & $y_1$ & $y_2$ & \ldots & $y_n$
+  \end{tabular}
+  \end{displaymath}
+  \begin{itemize}
+  \item On one hand, interpolation of smooth functions gives accurate approximations. 
+  \item On the other hand, we can interpolate and extrapolate using our approximating functions.
+  \end{itemize}
+\end{frame}
+
+
+\subsection{Vandermonde Theory}
+
+
+\begin{frame}
+  \frametitle{Vandermonde Theory}
+  The most direct approach uses the vanderMonde matrix. We can require our polynomial to be expressed in powers of $x$:
+  \[ p(x)=a_0+a_1x+a_2x^2+\cdots+a_nx^n \]
+  The interpolation conditions, $p(x_i)=y_i$ for $0\le i\le n$, lead to a system of $n+1$ linear equations for determining $a_0,a_1,\ldots,a_n$. This system has the form
+  \begin{displaymath}
+  \begin{bmatrix}
+     1    &   x_0   & x_0^2  & \cdots & x_0^n  \\
+     1    &   x_1   & x_1^2  & \cdots & x_1^n  \\
+     1    &   x_2   & x_2^2  & \cdots & x_2^n  \\
+  \vdots  & \vdots  & \vdots & \ddots & \vdots \\
+     1    &   x_n   & x_n^2  & \cdots & x_n^n
+  \end{bmatrix}
+  \begin{bmatrix}
+  a_0    \\
+  a_1    \\
+  a_2    \\
+  \vdots \\
+  a_n
+  \end{bmatrix}
+  =\begin{bmatrix}
+  y_0    \\
+  y_1    \\
+  y_2    \\
+  \vdots \\
+  y_n
+  \end{bmatrix}
+  \end{displaymath}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Vandermonde Theory}
+  \begin{itemize}
+  \item The Vandermonde matrix is nonsingular because the system has a unique solution for any choice of $y_0,y_1,\ldots,y_n$.
+  \item However, the Vandermonde matrix is often ill conditioned, and the coefficients $a_i$ may therefore be inaccurately determined by solving the System.
+  \item Therefore, this approach is not recommended.
+  \end{itemize}
+\end{frame}
+
+
+\subsection{Newton Form of the Interpolation Polynomial}
+ 
+
+\begin{frame}
+  \frametitle{Polynomial Interpolation}
+  \newtheorem{theorem 1}{THEOREM}
+  \begin{theorem 1}[Theorem on polynomial Interpolation]
+  If $x_0,x_1,\ldots,x_n$ are distinct real numbers, then for arbitrary values $y_0,y_1,\ldots,y_n$, there is a unique polynomial $p_n$ of degree at most $n$ such that
+  \begin{displaymath}
+  p_n(x_i)=y_i \quad (0 \le i \le n)
+  \end{displaymath}
+  \end{theorem 1} 
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Newton Form of the Interpolation Polynomial}
+  Suppose that we hane obtained a polynomial $p_{k-1}$ of degree $\le k-1$ with $p_{k-1}(x_i)=y_i$ for $0 \le i \le k-1$. We try to construct $p_k$ in the form
+  \[ p_k(x)=p_{k-1}(x)+c(x-x_0)(x-x_1)\cdots(x-x_{k-1}) \]
+  Note that $p_k$ interpolates the data that $p_{k-1}$ interpolates because
+  \[ p_k(x_i)=p_{k-1}(x_i)=y_i \qquad (0 \le i \le k-1) \]
+  Now we determine the unknown coefficient $c$ from the condition $p_k(x_k)=y_k$. This leads to the equation
+  \[ p_{k-1}(x_k)+c(x_k-x_0)(x_k-x_1)\cdots(x_k-x_{k-1})=y_k \]
+  If $x_0,x_1,\ldots,x_k$ are prescribed, then for arbitrary values $y_0,y_1,\ldots,y_k$, there is a polynomial p of degree at most k having the form
+  \[ p_k(x)=c_0+c_1(x-x_0)+c_2(x-x_0)(x-x_1)+\ldots+c_k(x-x_0)\ldots(x-x_{k-1}) \]
+  
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Newton Form of the Interpolation Polynomial}
+  To obtain $u=p_k(t)$ for a prescribed value of $t$, assuming that the coefficients $c_0,c_1,\ldots,c_k$ are known, an efficient method called \textbf{nested multiplication} or \textbf{Horner's algorithm} is used.
+  
+  $u \gets c_k$\\
+  \textbf{for} $i=k-1$ \textbf{to} 0 \textbf{step} -1 \textbf{do}\\
+  \quad $u \gets (t-x_i)u+c_i$\\
+  \textbf{end do}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Newton Form of the Interpolation Polynomial}
+  An algorithm to compute $c_0,c_1,\ldots,c_n$ from the table of values for $x_0,x_1,\ldots,x_n$ and $y_0,y_1,\ldots,y_n$ follows:\\
+  $c_0 \gets y_0$\\
+  \textbf{for} $k=1$ \textbf{to} $n$ \textbf{do}\\
+  \quad $d \gets x_k-x_{k-1}$\\
+  \quad $u \gets c_{k-1}$\\
+  \quad \textbf{for} $i=k-2$ \textbf{to} 0 \textbf{step} -1 \textbf{do}\\
+  \quad \quad $u \gets u(x_k-x_i)+c_i$\\
+  \quad \quad $d \gets d(x_k-x_i)$\\
+  \quad \textbf{end do}\\
+  \quad $c_k \gets (y_k-u)/d$\\
+  \textbf{end do}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Newton Form of the Interpolation Polynomial}
+  \lstinputlisting{./Coefficient.m}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Divided Differences}
+  For $q_j(x)=(x-x_0)(x-x_1)(x-x_2)\cdots(x-x_{j-1})$\\
+  The Newton form is $p(x)=\sum_{j=0}^n c_jq_j(x)$\\
+  The interpolation conditions $p(x_i)=f(x_i)$ give rise to a linear system of equations for the determination of the unknown coefficients, $c_j$:\\
+  \quad \quad $\sum_{j=0}^n c_jq_j(x_i)=f(x_i) \quad (0\le i\le n)$\\
+  In this system of equations, the coefficient matrix is an $(n+1)\times(n+1)$ matrix $A$ whose elements are\\
+  \quad \quad $a_{ij}=q_j(x_i) \quad (0\le i, j\le n)$\\
+  
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Divided Differences}
+  For example, consider the case of three nodes with\\
+  \qquad $p_2(x)=c_0q_0(x)+c_1q_1(x)+c_2q_2(x)$\\
+  \qquad \qquad $=c_0+c_1(x-x_0)+c_2(x-x_0)(x-x_1)$\\
+  Setting $x=x_0,x=x_1$, and $x=x_2$, we have a lower triangular system\\
+  \begin{displaymath}
+  \begin{bmatrix}
+  1 &     0     &          0         & \\
+  1 & (x_1-x_0) &          0         & \\
+  1 & (x_2-x_0) & (x_2-x_0)(x_2-x_1) & \\
+  \end{bmatrix}
+  \begin{bmatrix}
+  c_0\\
+  c_1\\
+  c_2\\
+  \end{bmatrix}
+  =\begin{bmatrix}
+  f(x_0)\\
+  f(x_1)\\
+  f(x_2)\\
+  \end{bmatrix}
+  \end{displaymath}
+  We can see that $c_0$ depends on only $f(x_0)$, that $c_1$ depends on $f(x_0)$ and $f(x_1)$, and so on. Thus, $c_n$ depends on $f$ at $x_0,x_1,\ldots,x_n$.
+  \[ c_n=f[x_0,x_1,\ldots,x_n] \]
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Divided Differences}
+  \newtheorem{theorem 2}[theorem 1]{THEOREM}
+  \begin{theorem 2}[Theorem on Higher-Order Divided Differences]
+  Divided differences satisfy the equation
+  \begin{displaymath}
+  f[x_0,x_1,\ldots,x_n]=\frac{f[x_1,x_2,\ldots,x_n]-f[x_0,x_1,\ldots,x_{n-1}]}{x_n-x_0}
+  \end{displaymath}
+  \end{theorem 2}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Divided Differences}
+  In the formulas, $x_0,x_1,x_2,\ldots$ can be interpreted as independent variables. Because of that, we also have equations such as
+  \begin{displaymath}
+  f[x_i,x_{i+1},\ldots,x_{i+j}]=\frac{f[x_{i+1},x_{i+2},\ldots,x_{i+j}]-f[x_i,x_{i+1},\ldots,x_{i+j-1}]}{x_{i+j}-x_i}
+  \end{displaymath}
+  If a table of function values $(x_i,f(x_i))$ is given, we can construct from it a table of divided differences. This is customarily laid out in the following form, where differences of orders 0,1,2, and 3 are shown in each successive column:\\
+  \begin{tabular}{c c| c c c}
+  $x_0$ & $f[x_0]$ & $f[x_0,x_1]$ & $f[x_0,x_1,x_2]$ & $f[x_0,x_1,x_2,x_3]$\\
+  $x_1$ & $f[x_1]$ & $f[x_1,x_2]$ & $f[x_1,x_2,x_3]$ &  \\
+  $x_2$ & $f[x_2]$ & $f[x_2,x_3]$ &                  &  \\
+  $x_3$ & $f[x_3]$ &              &                  &  \\
+  \end{tabular}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Algorithm for Divided Differences}
+  An algorithm for computing a divided difference table can be very efficient and is recommended as the best means for producing an interpolating polynomial.\\
+  \begin{tabular}{c c| c c c c c c}
+  $x_0$     & $c_{00}$     & $c_{01}$    &  $c_{02}$ & $c_{03}$ & $\cdots$ & $c_{0,n-1}$ &$c_{0,n}$\\
+  $x_1$     & $c_{10}$     & $c_{11}$    &  $c_{12}$ & $c_{13}$ & $\cdots$ & $c_{1,n-1}$ & \\
+  $x_2$     & $c_{20}$     & $c_{21}$    &  $c_{22}$ & $c_{23}$ &          &             & \\
+  $\vdots$  & $\vdots$     & $\vdots$    &  $\vdots$ &          &          &             & \\
+  $\vdots$  & $\vdots$     & $\vdots$    &           &          &          &             & \\
+  $x_{n-1}$ &$c_{n-1,0}$   & $c_{n-1,1}$ &           &          &          &             & \\
+  $x_n$     & $c_{n0}$     &             &           &          &          &             & \\
+  \end{tabular}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Algorithm for Divided Differences}
+  It is clear that we have set $c_{ij}=f[x_i,x_{i+1},\ldots,x_{i+j}]$\\
+  An algorithm is obtained from a direct translation of Equation 
+  \[ f[x_i,x_{i+1},\ldots,x_{i+j}]=\frac{f[x_{i+1},x_{i+2},\ldots,x_{i+j}]-f[x_i,x_{i+1},\ldots,x_{i+j-1}]}{x_{i+j}-x_i} \]
+  \textbf{for} $j=1$ \textbf{to} $n$ \textbf{do}\\
+  \qquad \textbf{for} $i=0$ \textbf{to} $n-j$ \textbf{do}\\
+  \qquad \qquad $c_{ij}\gets (c_{i+1,j-1}-c{i,j-1})/(x{i+j}-x_i)$\\
+  \qquad \textbf{end do}\\
+  \textbf{end do}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Algorithm for Divided Differences}
+  Another algorithm can be designed that uses less storage space in the computer.\\
+  \textbf{for} $i=0$ \textbf{to} $n$ \textbf{do}\\
+  \qquad $d_i \gets f(x_i)$
+  \textbf{end do}
+  \textbf{for} $j=1$ \textbf{to} $n$ \textbf{do}\\
+  \qquad \textbf{for} $i=n$ \textbf{to} $j$ \textbf{step} -1 \textbf{do}\\
+  \qquad \qquad $d_i \gets (d_i-d{i-1})/(x_i-x_{i-j})$\\
+  \qquad \textbf{end do}\\
+  \textbf{end do}
+\end{frame} 
+
+
+\begin{frame}
+  \frametitle{Algorithm for Divided Differences}
+  \lstinputlisting{./dividedDifferences.m}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Algorithm for Divided Differences}
+  \lstinputlisting{./lessStorage.m}
+\end{frame}
+
+
+\subsection{Lagrange Form of the Interpolation Polynomial}
+
+
+\begin{frame}
+  \frametitle{Lagrange Form of the Interpolation Polynomial}
+  The alternative method will express $p$ in the form
+  \begin{displaymath}
+  p(x)=y_0l_0(x)+y_1l_1(x)+\ldots+y_nl_n(x)=\sum_{k=0}^n y_kl_k(x)
+  \end{displaymath}
+  Here $l_0,l_1,\ldots,l_n$ are polynomials that depend on the nodes $x_0,x_1,\ldots,x_n$ but not on the ordinates $y_0,y_1,\ldots,y_n$.
+  
+  Since all the ordinates could be 0 expect for a 1 occupying the $i$th position, we see that $\delta_{ij}=l_i(x_j)$.
+\end{frame}
+
+
+
+\begin{frame}
+  \frametitle{Lagrange Form of the Interpolation Polynomial}
+  Let us consider $l_0$. It is to be a polynomial of degree $n$ that takes the value 0 at $x_1,x_2,\ldots,x_n$ and the value 1 at $x_0$. Clearly, $l_0$ must be of the form\\
+  \quad \quad $l_0(x)=c(x-x_1)(x-x_2)\ldots(x-x_n)=c\prod_{j=1}^n (x-x_j)$\\
+  The value of $c$ is obtained by putting $x=x_0$, so that\\
+  \quad \quad $1=c\prod_{j=1}^n (x_0-x_j)$ \quad and $c=\prod_{j=1}^n(x_0-x_j)^{-1}$\\
+  Hence, we have \\
+  \quad \quad $l_0(x)=\prod_{j=1}^n \frac{x-x_j}{x_0-x_j}$
+  
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Lagrange Form of the Interpolation Polynomial}
+  Each $l_i$ is obtained by similar reasoning, and the general formula is then 
+  \[ l_i(x)=\prod_{\substack{j=0 \\ j \ne i}}^n \frac{x-x_j}{x_i-x_j} \quad (0 \le i \le n) \]
+  For the set of nodes $x_0,x_1,\ldots,x_n$, these polynomials are known as the \textbf{cardinal functions}.
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Comparisons}
+  \begin{tabular}{|c| c|}
+  \hline
+  the Newton form & the Lagrange form\\
+  \hline
+  If more data points are added to  & a single set of fixed $x_i$ nodes \\
+  the interpolation problem, the  & with many different $y_i$ values\\
+  coefficients already computed  & associated with them\\
+  will not have to be changed. &  \\
+  \hline
+  \end{tabular}
+\end{frame}
+
+
+
+
+
+\section{Hermite Interpolation}
+
+
+\subsection{Introduction}
+
+
+\begin{frame}
+  \frametitle{Hermite Interpolation}
+  The term \textbf{Hermite Interpolation} refers to the interpolation of a function and some of its derivatives at a set of nodes. \\
+  In a Hermite problem, it is assumed that whenever a derivative $p^{(j)}(x_i)$ is to be prescribed (at a node $x_i$), $p^{(j-1)}(x_i)$, $p^{(j-2)}(x_i)$, \dots, $p'(x_i)$, and $p(x_i)$ will also be prescribed. We choose our notation so that at node $x_i$, $k_i$ interpolatory conditions are prescribed. Let the nodes be $x_0,x_1,\ldots,x_n$, and suppose that at node $x_i$ these interpolation conditions are given:
+  \[ p^{(j)}(x_i)=c_{ij} \qquad (0 \le j \le k_i-1,0 \le i \le n) \]
+  The total number of conditions on $p$ is denoted by $m+1$, and therefore
+  \[ m+1=k_0+k_1+\cdots+k_n \]
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Hermite Interpolation}
+  \newtheorem{theorem 3}[theorem 1]{THEOREM}
+  \begin{theorem 3}[Theorem on Hermite Interpolation]
+  There exists a unique polynomial $p$ in $\prod_m$ fulfilling the Hermite interpolation conditions in Equation $p^{(j)}(x_i)=c_{ij}$
+  \end{theorem 3}
+\end{frame}
+
+
+\subsection{Newton Divided Difference Method}
+
+
+\begin{frame}
+  \frametitle{Newton Divided Difference Method}
+  We begin with a simple case in which a quadratic polynomial $p$ is sought, taking prescribed values:
+  \[ p(x_0)=c_{00} \qquad p'(x_0)=c_{01} \qquad p(x_1)=c_{10} \]
+  We write the divided difference table in this form:\\
+  \begin{tabular}{c c| c c}
+  $x_0$    & $c_{00}$    & $c_{01}$    &  ? \\
+  $x_0$    & $c_{00}$    &    ?        &    \\
+  $x_1$    & $c_{10}$    &             &    \\  
+  \end{tabular}
+  \[ f[x_0,x_0,\ldots,x_0]=\frac{1}{k!}f^{(k)}(x_0) \]
+\end{frame}
+
+
+\subsection{Lagrange Form}
+
+
+\begin{frame}
+  \frametitle{Lagrange Form}
+  \begin{itemize}
+  \item Let the nodes be $x_0,x_1,\ldots,x_n$ and assume that at each node a function value and the first derivative have been prescribed. The polynomial $p$ that we seek must satisfy these equations:
+  \begin{displaymath}
+  p(x_i)=c_{i0}\qquad p'(x_i)=c_{i1}\qquad (0\leq i\leq n)
+  \end{displaymath}
+  In analogy with the Lagrange formula,
+  \begin{displaymath}
+  p(x)=\sum_{i=0}^{n}c_{i0}A_i(x)+\sum_{i=0}^{n}c_{i1}B_i(x)
+  \end{displaymath}
+  in which $A_i$ and $B_i$ are to be polynomial.
+  \begin{displaymath}
+  \left \{\begin{array}{l}
+  A_i(x_j)=\delta_{ij}\\
+  A_i'(x_j)=0
+  \end{array} \right.
+  \left \{\begin{array}{l}
+  B_i(x_j)=0\\
+  B_i'(x_j)=\delta_{ij}
+  \end{array} \right.
+  \end{displaymath}
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Lagrange Form}
+  \begin{itemize}
+  \item With the aid of the functions
+  \begin{displaymath}
+  l_i(x)=\prod_{\begin{subarray}{l}
+  j=0\\
+  j\neq i
+  \end{subarray}}^n\frac{x-x_j}{x_i-x_j}\qquad (0\leq i\leq n)
+  \end{displaymath}
+  $A_i$ and $B_i$ can be defined as follows:
+  \begin{displaymath}
+  \left \{\begin{array}{ll}
+  A_i(x)=[1-2(x-x_i)l_i'(x_i)]l_i^2(x)\qquad (0\leq i\leq n)\\
+  B_i(x)=(x-x_i)l_i^2(x)\qquad (0\leq i\leq n)
+  \end{array} \right.
+  \end{displaymath}
+  \end{itemize}
+\end{frame}
+
+
+
+\end{document}
