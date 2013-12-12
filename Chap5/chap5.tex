@@ -1,0 +1,198 @@
+\documentclass[notheorems,mathserif,table,compress]{beamer}  %dvipdfm选项是关键,否则编译统统通不过
+%%------------------------常用宏包------------------------
+%%注意, beamer 会默认使用下列宏包: amsthm, graphicx, hyperref, color, xcolor, 等等
+\usepackage{fontspec,xunicode,xltxtra}
+\usepackage{amsfonts,amssymb}  % for XeTeX
+%%------------------------ThemeColorFont------------------------
+%% Presentation Themes
+% \usetheme[<options>]{<name list>}
+\usetheme{Madrid}
+%% Inner Themes
+% \useinnertheme[<options>]{<name>}
+%% Outer Themes
+% \useoutertheme[<options>]{<name>}
+\useoutertheme{miniframes} 
+%% Color Themes 
+% \usecolortheme[<options>]{<name list>}
+%% Font Themes
+% \usefonttheme[<options>]{<name>}
+\setbeamertemplate{background canvas}[vertical shading][bottom=white,top=structure.fg!7] %%背景色, 上25%的蓝, 过渡到下白.
+\setbeamertemplate{theorems}[numbered]
+\setbeamertemplate{navigation symbols}{}   %% 去掉页面下方默认的导航条.
+\usepackage{zhfontcfg}
+\usepackage{iplouclistings}
+%\setsansfont[Mapping=tex-text]{文泉驿正黑}  %% 需要fontspec宏包
+     %如果装了Adobe Acrobat,可在font.conf中配置Adobe字体的路径以使用其中文字体
+     %也可直接使用系统中的中文字体如SimSun,SimHei,微软雅黑 等
+     %原来beamer用的字体是sans family;注意Mapping的大小写,不能写错
+     %设置字体时也可以直接用字体名，以下三种方式等同：
+     %\setromanfont[BoldFont={黑体}]{宋体}
+     %\setromanfont[BoldFont={SimHei}]{SimSun}
+     %\setromanfont[BoldFont={"[simhei.ttf]"}]{"[simsun.ttc]"}
+%%------------------------MISC------------------------
+\graphicspath{{figures/}}         %% 图片路径. 本文的图片都放在这个文件夹里了.
+%%------------------------正文------------------------
+\begin{document}
+\XeTeXlinebreaklocale "zh"         % 表示用中文的断行
+\XeTeXlinebreakskip = 0pt plus 1pt % 多一点调整的空间
+%%----------------------------------------------------------
+%% This is only inserted into the PDF information catalog. Can be left
+%% out.
+%%%
+%% Delete this, if you do not want the table of contents to pop up at
+%% the beginning of each subsection:
+\AtBeginSection[]{                              % 在每个Section前都会加入的Frame
+  \frame<handout:0>{
+    \frametitle{内容提要}\small
+    \tableofcontents[current,currentsubsection]
+  }
+}
+\AtBeginSubsection[]                            % 在每个子段落之前
+{
+  \frame<handout:0>                             % handout:0 表示只在手稿中出现
+  {
+    \frametitle{下一节内容}\small
+    \tableofcontents[current,currentsubsection] % 显示在目录中加亮的当前章节
+  }
+}
+%%----------------------------------------------------------
+\title[Numerical Analysis]{Numerical Analysis}
+\subtitle{Mathematics of Scientific Computing}
+\author[sun]{Name~~~~~\textcolor{olive}{Sun Xiaoqing}\\
+      \quad 幻灯片制作~~\textcolor{olive}{孙晓庆}}
+   
+\institute[中国海洋大学]{\small\textcolor{violet}{中国海洋大学~~信息科学与工程学院}}
+\date{2013~年~11~月~21~日}
+%\titlegraphic{\vspace{-6em}\includegraphics[height=7cm]{ouc}\vspace{-6em}}
+\frame{ \titlepage }
+%%----------------------------------------------------------
+\section*{目录}
+\frame{\frametitle{目录}\tableofcontents}
+%%----------------------------------------------------------
+\section{Matrix Eigenvalue Problem by Power Methods}
+\subsection{Power Method}%如果你想书签不出现问题,请不要用\XeTeX
+                                 %这类复杂的指令,直接写XeTeX吧
+\begin{frame}
+To compute the dominant eigenvalue of $A$,\\
+A has the following two properties:
+\begin{itemize}
+\item There is a single eigenvalue of maximum modulus.
+\item There is a linearly independent set of $n$ eigenvectors.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+Two assumpting:
+\begin{itemize}
+\item The eigenvalues $\lambda_{1}$, $\lambda_{2}$,..., $\lambda_{n}$ can be labed $|\lambda_{1}|>|\lambda_{2}|\geq ... \geq|\lambda_{n}|$.
+\item There is a basic ${u^{(1)}, u^{(2)},..., u^{(n)}}$, for that $Au^{(j)}=\lambda_{j}u^{(j)}$
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+$x^{(0)}=a_{1}u^{(1)}+a_{2}u^{(2)}+...+a_{n}u^{(n)}$\qquad $(a_{1}\neq0)$\\
+$x^{(1)}=Ax^{(0)}$ \qquad $x^{(2)}=Ax^{(1)}$ ... \qquad $x^{(k)}=Ax^{(k-1)}$\\
+$x^{(k)}=A^{k}x^{(0)}$\\
+$x^{(0)}=u^{(1)}+u^{(2)}+...+u^{(n)}$\\
+$x^{(k)}=A^{k}u^{(1)}+A^{k}u^{(2)}+...+A^{k}u^{(n)}$\\
+$x^{(k)}=\lambda_{1}^{k}u^{(1)}+\lambda_{2}^{k}u^{(2)}+...+\lambda_{k}^{k}u^{(n)}$\\
+$x^{(k)}=\lambda_{1}^{k}[u^{(1)}+(\lambda_{2}/\lambda_{1})^{k}u^{(2)}+...+(\lambda_{n}/\lambda_{1})^{k}u^{(n)}]$\\
+Since $|\lambda_{1}|>|\lambda_{j}|$, so $k\rightarrow \infty$, $(\lambda_{j}/\lambda_{1})^{k}\rightarrow 0$\\
+$x^{(k)}=\lambda_{1}^{k}[u^{(1)}+\varepsilon^{(k)}]$\\
+$\varphi (x^{(k)})=\lambda_{1}^{k}[\varphi(u^{(1)})+\varphi(\varepsilon^{(k)})]$\\
+When$k\rightarrow \infty$, $r_{k}=\frac{\varphi (x^{(k+1)})}{\varphi (x^{(k)})}=\lambda_{1}\frac{[\varphi(u^{(1)})+\varphi(\varepsilon^{(k+1)})]}{[\varphi(u^{(1)})+\varphi(\varepsilon^{(k)})]}\rightarrow \lambda_{1}$
+\end{frame}
+       
+% \XeTeXpicfile "./logo.jpg" xscaled 100 yscaled 100 %插图也没有问
+\begin{frame}
+Algorithm of Power Method\\
+input $A$, $x$, $M$\\
+for $k=1$ to $M$ do\\
+$y\leftarrow Ax$\\
+$r\leftarrow \varphi(y)/\varphi(x)$\\
+$x\leftarrow y$\\
+output $k$, $x$, $r$\\
+end do\\
+\end{frame}
+
+\begin{frame}
+\lstinputlisting{./code/Powermethod/powerMethod.m}
+\lstinputlisting{./code/Powermethod/linearFun.m}
+\end{frame}
+
+\subsection{Inverse Power Method}
+\begin{frame}
+The inverse power method comput the smallest engenvalue of $A$.\\
+Eigenvalues of $A$ can be arranged as follows:\\
+$|\lambda_{1}|>|\lambda_{2}|\geq ... \geq|\lambda_{n}|>0$.\\
+Eigenvalues of $A^{-1}$ can be arranged as follows:\\
+$|\lambda_{n}^{-1}|>|\lambda_{n-1}^{-1}|\geq ... \geq|\lambda_{1}^{-1}|>0$.\\
+$x^{(k+1)}=A^{-1}x^{(k)}$
+\end{frame}
+
+\begin{frame}
+\lstinputlisting{./code/inversepower.m}
+\lstinputlisting{./code/Powermethod/linearFun.m}
+\end{frame}
+
+
+
+\subsection{Summary}
+\begin{frame}
+\frametitle{Summary}
+\begin{tabular}{lllrrrcc}
+Method          & Equation & Computes\\
+power           &    $x^{(k+1)}=Ax^{(k)}$ &lagest eigenvalue\\
+inverse power  & $Ax^{(k+1)}=x^{(k)}$ & smallest eigenvalue\\
+shifted power  & $x^{(k+1)}=(A-uI)x^{(k)}$ &  eigenvalue farthest from $u$\\
+shifted inverse power  & $(A-uI)x^{(k+1)}=x^{(k)}$ &  eigenvalue closest to $u$\\
+\end{tabular}
+\end{frame}
+
+
+
+
+
+\begin{frame}
+The code of shifted power
+\lstinputlisting{./code/shiftpower.m}
+\lstinputlisting{./code/Powermethod/linearFun.m}
+\end{frame}
+
+\begin{frame}
+The code of shifted inverse power
+\lstinputlisting{./code/invshiftpower.m}
+\lstinputlisting{./code/Powermethod/linearFun.m}
+\end{frame}
+
+
+
+\section{QR-Factorization}
+
+\begin{frame}
+\frametitle{QR-Factorization}
+$A=QR$\\
+$A$ is an $m\times n$ matrix, $Q$ is an $m\times m$ unitary matrix and $R$ is an $m\times n$ upper triangular martrix. 
+\end{frame}
+
+
+\begin{frame}
+
+$A_{1}=A$\\
+$A_{1}=Q_{1}R_{1}$\\
+$A_{2}=R_{1}Q_{1}$, $A_{2}\sim A_{1}=A$\\
+$A_{2}=Q_{2}R_{2}$\\
+$A_{3}=R_{2}Q_{2}$, $A_{3}\sim A_{2}\sim A_{1}=A$\\
+we have iterative process as follows:\\
+$A_{k}=Q_{k}R_{k}$  $(A_{1}=A)$\\
+$A_{k+1}=R_{k}Q_{k}$,  $(k=1,2\cdots \cdots )$\\
+$A_{k+1}\sim A$\\
+$A_{k}$ converges to the upper triangular matrix whose diagonal elements are $\lambda_{1}, \lambda_{2}, \cdots \cdots \lambda_{n}$.
+
+\end{frame}
+
+
+
+
+\end{document}
